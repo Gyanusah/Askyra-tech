@@ -1,0 +1,24 @@
+1. web services
+	--- web development
+	--- MERN Stack
+	--- FULLSTACK
+	---FRONTEND(HTML,CSS,Javascript,react, git,github)
+
+2. Cyber security
+	--- Penetration Testing
+	--- VAPT
+	--- SOC L1 
+	--- Ethical Hacking
+	--- Networking
+	--- Linux
+
+3. Digital Marketing
+	--- Meta AD marketing( facebook, Instagram)
+	--- Google AD marketing
+	--- Email marketing
+
+4. Graphics Designing
+	--- Photoshop
+	--- figma
+	--- Canva
+	--- Adobe AI

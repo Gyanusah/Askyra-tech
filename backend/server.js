@@ -2,18 +2,18 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-// import dns from "node:dns";
+//import dns from "node:dns";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import mongoose from "mongoose";
 import { isIP } from "node:net";
 import { z } from "zod";
-import { createAuthRouter, requireAuth } from "./middleware/auth.js";
-import { createCommerceRouter } from "./routes/commerce.routes.js";
-import { createDashboardRouter } from "./routes/dashboard.routes.js";
-import { createPaymentsRouter } from "./routes/payments.routes.js";
-import { User } from "./models/index.js";
+import { createAuthRouter, requireAuth } from "./src/middleware/auth.js";
+import { createCommerceRouter } from "./src/routes/commerce.routes.js";
+import { createDashboardRouter } from "./src/routes/dashboard.routes.js";
+import { createPaymentsRouter } from "./src/routes/payments.routes.js";
+import { User } from "./src/models/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -215,12 +215,3 @@ process.on("SIGTERM", () => void shutdown("SIGTERM"));
 //   console.error("API startup failed:", error);
 //   process.exit(1);
 // });
-
-// Connect MongoDB
-await mongoose.connect(env.MONGODB_URI);
-
-// Create admin if not exists
-await bootstrapAdmin();
-
-// Export Express app
-// export default app;

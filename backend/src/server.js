@@ -133,7 +133,7 @@ app.use("/api", (req, res, next) => {
   return next();
 });
 
-app.get("/api/health", (_req, res) => {
+app.get("/", (_req, res) => {
   res.json({
     status: mongoose.connection.readyState === 1 ? "ok" : "starting",
     database:

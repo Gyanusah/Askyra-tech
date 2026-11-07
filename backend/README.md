@@ -6,11 +6,17 @@ requests, and NPR payments.
 ## Local setup
 
 1. Install Node.js and run MongoDB locally, or create a MongoDB Atlas database.
+   For Atlas, create a database user and add the machine's public IP address to
+   the project's Network Access IP access list.
 2. From `backend`, run `npm install`.
 3. Copy `.env.example` to `.env`. Replace `JWT_SECRET`, `ADMIN_EMAIL`, and
    `ADMIN_PASSWORD` with private values. The admin password must be at least
    12 characters.
 4. Set `MONGODB_URI` to your database connection string. Never commit `.env`.
+   If Node.js reports `querySrv ECONNREFUSED`, optionally set
+   `MONGODB_DNS_SERVERS` to comma-separated DNS resolver IP addresses reachable
+   from your network (for example, `8.8.8.8,8.8.4.4` where permitted). This only
+   configures SRV lookup; it does not replace Atlas's IP access list.
 5. Start the API with `npm run dev`. The default API port is 5000.
 6. In another terminal, start the frontend with `cd ../frontend && npm run dev`.
 

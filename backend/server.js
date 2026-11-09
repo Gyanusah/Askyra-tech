@@ -9,11 +9,11 @@ import helmet from "helmet";
 import mongoose from "mongoose";
 import { isIP } from "node:net";
 import { z } from "zod";
-import { createAuthRouter, requireAuth } from "./src/middleware/auth.js";
-import { createCommerceRouter } from "./src/routes/commerce.routes.js";
-import { createDashboardRouter } from "./src/routes/dashboard.routes.js";
-import { createPaymentsRouter } from "./src/routes/payments.routes.js";
-import { User } from "./src/models/index.js";
+import { createAuthRouter, requireAuth } from "./middleware/auth.js";
+import { createCommerceRouter } from "./routes/commerce.routes.js";
+import { createDashboardRouter } from "./routes/dashboard.routes.js";
+import { createPaymentsRouter } from "./routes/payments.routes.js";
+import { User } from "./models/index.js";
 import path from "path";
 import { fileURLToPath } from "url";
 

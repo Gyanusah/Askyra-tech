@@ -53,48 +53,70 @@ export function createAuthRouter(express, config, rateLimit) {
     });
   }
 
-  router.post("/signup", authLimiter, asyncRoute(async (req, res) => {
-    const input = signupSchema.safeParse(req.body);
-    if (!input.success) {
-      return res.status(400).json({ error: "Enter a valid name, email, password (8+ characters), and account type." });
-    }
+  router.post(
+    "/signup",
+    authLimiter,
+    asyncRoute(async (req, res) => {
+      const input = signupSchema.safeParse(req.body);
+      if (!input.success) {
+        return res.status(400).json({
+          error:
+            "Enter a valid name, email, password (8+ characters), and account type.",
+        });
+      }
 
-    const email = input.data.email.toLowerCase();
-    const existing = await User.findOne({ email }).select("_id");
-    if (existing) return res.status(409).json({ error: "An account with this email already exists." });
+      const email = input.data.email.toLowerCase();
+      const existing = await User.findOne({ email }).select("_id");
+      if (existing)
+        return res
+          .status(409)
+          .json({ error: "An account with this email already exists." });
 
-    const passwordHash = await bcrypt.hash(input.data.password, 12);
-    const role = input.data.role;
-    const user = await User.create({
-      email,
-      passwordHash,
-      role,
-      name: input.data.name,
-      companyName: role === "company" ? input.data.name : "",
-    });
-    setSessionCookie(res, user);
-    return res.status(201).json({ user: publicUser(user) });
-  }));
+      const passwordHash = await bcrypt.hash(input.data.password, 12);
+      const role = input.data.role;
+      const user = await User.create({
+        email,
+        passwordHash,
+        role,
+        name: input.data.name,
+        companyName: role === "company" ? input.data.name : "",
+      });
+      setSessionCookie(res, user);
+      return res.status(201).json({ user: publicUser(user) });
+    }),
+  );
 
-  router.post("/login", authLimiter, asyncRoute(async (req, res) => {
-    const input = loginSchema.safeParse(req.body);
-    if (!input.success) return res.status(400).json({ error: "Enter a valid email and password." });
+  router.post(
+    "/login",
+    authLimiter,
+    asyncRoute(async (req, res) => {
+      const input = loginSchema.safeParse(req.body);
+      if (!input.success)
+        return res
+          .status(400)
+          .json({ error: "Enter a valid email and password." });
 
-    const user = await User.findOne({ email: input.data.email.toLowerCase() })
-      .select("+passwordHash");
-    const passwordMatches = user
-      ? await bcrypt.compare(input.data.password, user.passwordHash)
-      : false;
-    if (!user || !passwordMatches || !user.isActive) {
-      return res.status(401).json({ error: "Email or password is incorrect." });
-    }
-    if (input.data.role && input.data.role !== user.role) {
-      return res.status(403).json({ error: "This account does not have the selected role." });
-    }
+      const user = await User.findOne({
+        email: input.data.email.toLowerCase(),
+      }).select("+passwordHash");
+      const passwordMatches = user
+        ? await bcrypt.compare(input.data.password, user.passwordHash)
+        : false;
+      if (!user || !passwordMatches || !user.isActive) {
+        return res
+          .status(401)
+          .json({ error: "Email or password is incorrect." });
+      }
+      if (input.data.role && input.data.role !== user.role) {
+        return res
+          .status(403)
+          .json({ error: "This account does not have the selected role." });
+      }
 
-    setSessionCookie(res, user);
-    return res.json({ user: publicUser(user) });
-  }));
+      setSessionCookie(res, user);
+      return res.json({ user: publicUser(user) });
+    }),
+  );
 
   router.post("/logout", (req, res) => {
     res.clearCookie(config.cookieName, {
@@ -106,7 +128,9 @@ export function createAuthRouter(express, config, rateLimit) {
     return res.json({ message: "Signed out." });
   });
 
-  router.get("/me", requireAuth(config), (req, res) => res.json({ user: publicUser(req.user) }));
+  router.get("/me", requireAuth(config), (req, res) =>
+    res.json({ user: publicUser(req.user) }),
+  );
   return router;
 }
 
@@ -123,14 +147,18 @@ export function requireAuth(config) {
       User.findById(payload.sub)
         .then((user) => {
           if (!user || !user.isActive || user.role !== payload.role) {
-            return res.status(401).json({ error: "Your session is no longer valid." });
+            return res
+              .status(401)
+              .json({ error: "Your session is no longer valid." });
           }
           req.user = user;
           return next();
         })
         .catch(next);
     } catch {
-      return res.status(401).json({ error: "Your session has expired. Sign in again." });
+      return res
+        .status(401)
+        .json({ error: "Your session has expired. Sign in again." });
     }
   };
 }
@@ -138,7 +166,9 @@ export function requireAuth(config) {
 export function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ error: "You are not allowed to perform this action." });
+      return res
+        .status(403)
+        .json({ error: "You are not allowed to perform this action." });
     }
     return next();
   };

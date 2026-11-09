@@ -87,7 +87,7 @@ if (
 
 const config = {
   jwtSecret: env.JWT_SECRET,
-  clientOrigin: env.CLIENT_ORIGIN,
+  clientOrigin: env.CLIENT_ORIGIN.replace(/\/+$/, ""),
   apiPublicUrl: env.API_PUBLIC_URL.replace(/\/$/, ""),
   cookieName: "askyra_session",
   cookieSecure: env.NODE_ENV === "production",
@@ -115,7 +115,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: env.CLIENT_ORIGIN,
+    origin: config.clientOrigin,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -127,7 +127,7 @@ app.use(cookieParser());
 app.use("/api", (req, res, next) => {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
   const origin = req.get("origin");
-  if (origin && origin !== env.CLIENT_ORIGIN) {
+  if (origin && origin !== config.clientOrigin) {
     return res.status(403).json({ error: "Request origin is not allowed." });
   }
   return next();

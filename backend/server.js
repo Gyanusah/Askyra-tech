@@ -190,16 +190,16 @@ async function bootstrapAdmin() {
   // console.info(`Bootstrapped administrator account for ${email}.`);
 }
 
-// let server;
-// async function start() {
-//   await mongoose.connect(env.MONGODB_URI);
-//   await bootstrapAdmin();
-//   server = app.listen(env.PORT, () => {
-//     console.info(
-//       `AskYRA API listening on port ${env.PORT} (${env.NODE_ENV}, payments: ${env.PAYMENT_MODE}).`,
-//     );
-//   });
-// }
+let server;
+async function start() {
+  await mongoose.connect(env.MONGODB_URI);
+  await bootstrapAdmin();
+  server = app.listen(env.PORT, () => {
+    console.info(
+      `AskYRA API listening on port ${env.PORT} (${env.NODE_ENV}, payments: ${env.PAYMENT_MODE}).`,
+    );
+  });
+}
 
 async function shutdown(signal) {
   console.info(`${signal} received; closing API and database connections.`);
@@ -211,7 +211,7 @@ async function shutdown(signal) {
 process.on("SIGINT", () => void shutdown("SIGINT"));
 process.on("SIGTERM", () => void shutdown("SIGTERM"));
 
-// start().catch((error) => {
-//   console.error("API startup failed:", error);
-//   process.exit(1);
-// });
+start().catch((error) => {
+  console.error("API startup failed:", error);
+  process.exit(1);
+});

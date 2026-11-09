@@ -1,4 +1,7 @@
-const apiBase = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+const apiBase = (
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? "https://askyra-tech.vercel.app" : "")
+).replace(/\/$/, "");
 
 export async function apiFetch(path, options = {}) {
   const response = await fetch(`${apiBase}/api${path}`, {
@@ -16,10 +19,11 @@ export async function apiFetch(path, options = {}) {
     : null;
 
   if (!response.ok) {
-    const error = new Error(data?.error ?? `Request failed (${response.status}).`);
+    const error = new Error(
+      data?.error ?? `Request failed (${response.status}).`,
+    );
     error.status = response.status;
     throw error;
   }
   return data;
 }
-

@@ -16,6 +16,10 @@ export default function Dashboard() {
     setError("");
     try {
       const { user: currentUser } = await apiFetch("/auth/me");
+      if (!currentUser) {
+        navigate("/login", { replace: true });
+        return;
+      }
       setUser(currentUser);
     } catch (loadError) {
       if (loadError.status === 401) {
@@ -40,8 +44,13 @@ export default function Dashboard() {
     return (
       <main className="min-h-[60vh] px-4 py-10">
         <div className="mx-auto max-w-lg rounded-xl border border-rose-100 bg-white p-6 text-center">
-          <p role="alert" className="text-sm text-rose-700">{error}</p>
-          <button onClick={() => void loadUser()} className="mt-4 rounded-md bg-sky-700 px-4 py-2 text-xs font-bold text-white">
+          <p role="alert" className="text-sm text-rose-700">
+            {error}
+          </p>
+          <button
+            onClick={() => void loadUser()}
+            className="mt-4 rounded-md bg-sky-700 px-4 py-2 text-xs font-bold text-white"
+          >
             Retry
           </button>
         </div>
@@ -49,7 +58,11 @@ export default function Dashboard() {
     );
   }
   if (!user || user.role !== role.toLowerCase()) {
-    return <main className="min-h-[60vh] px-4 py-12 text-center text-sm text-slate-500">Checking your account…</main>;
+    return (
+      <main className="min-h-[60vh] px-4 py-12 text-center text-sm text-slate-500">
+        Checking your account…
+      </main>
+    );
   }
 
   const paymentResult = searchParams.get("payment");

@@ -40,7 +40,7 @@ export default function ServiceRequest() {
       .then(({ user: currentUser }) => {
         if (!active) return;
         setUser(currentUser);
-        if (currentUser.role === "company") {
+        if (currentUser?.role === "company") {
           setForm((current) => ({
             ...current,
             contactPerson: current.contactPerson || currentUser.name,
@@ -102,13 +102,17 @@ export default function ServiceRequest() {
         </div>
 
         {loadingUser ? (
-          <p className="rounded-lg bg-sky-50 p-4 text-sm text-slate-600">Checking your company account…</p>
+          <p className="rounded-lg bg-sky-50 p-4 text-sm text-slate-600">
+            Checking your company account…
+          </p>
         ) : user?.role !== "company" ? (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-amber-900">
             <h2 className="font-bold">Company account required</h2>
             <p className="mt-2 text-sm leading-6">
               Sign in or create a company account before submitting a request.
-              {authError && authError !== "Sign in to continue." ? ` ${authError}` : ""}
+              {authError && authError !== "Sign in to continue."
+                ? ` ${authError}`
+                : ""}
             </p>
             <Link
               to="/login/company"
@@ -138,7 +142,8 @@ export default function ServiceRequest() {
         ) : (
           <form onSubmit={submitRequest} className="space-y-4">
             <p className="rounded-lg bg-sky-50 p-3 text-xs text-slate-600">
-              Submitting as <strong>{user?.companyName || user?.name}</strong> · {user?.email}
+              Submitting as <strong>{user?.companyName || user?.name}</strong> ·{" "}
+              {user?.email}
             </p>
             <label className="block text-xs font-semibold text-slate-700">
               Contact person <span className="text-rose-500">*</span>
@@ -211,7 +216,10 @@ export default function ServiceRequest() {
             </label>
 
             {submitError && (
-              <p role="alert" className="rounded-lg bg-rose-50 p-3 text-xs text-rose-800">
+              <p
+                role="alert"
+                className="rounded-lg bg-rose-50 p-3 text-xs text-rose-800"
+              >
                 {submitError}
               </p>
             )}

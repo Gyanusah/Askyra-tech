@@ -128,16 +128,20 @@ export function createAuthRouter(express, config, rateLimit) {
     return res.json({ message: "Signed out." });
   });
 
-  router.get("/me", requireAuth(config), (req, res) =>
-    res.json({ user: publicUser(req.user) }),
+  router.get("/me", requireAuth(config, { optional: true }), (req, res) =>
+    res.json({ user: req.user ? publicUser(req.user) : null }),
   );
   return router;
 }
 
-export function requireAuth(config) {
+export function requireAuth(config, { optional = false } = {}) {
   return (req, res, next) => {
     const token = req.cookies?.[config.cookieName];
-    if (!token) return res.status(401).json({ error: "Sign in to continue." });
+    if (!token) {
+      return optional
+        ? next()
+        : res.status(401).json({ error: "Sign in to continue." });
+    }
     try {
       const payload = jwt.verify(token, config.jwtSecret, {
         issuer: "askyra-api",
@@ -147,6 +151,7 @@ export function requireAuth(config) {
       User.findById(payload.sub)
         .then((user) => {
           if (!user || !user.isActive || user.role !== payload.role) {
+            if (optional) return next();
             return res
               .status(401)
               .json({ error: "Your session is no longer valid." });
@@ -156,6 +161,7 @@ export function requireAuth(config) {
         })
         .catch(next);
     } catch {
+      if (optional) return next();
       return res
         .status(401)
         .json({ error: "Your session has expired. Sign in again." });

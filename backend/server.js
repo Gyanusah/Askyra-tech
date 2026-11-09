@@ -90,8 +90,11 @@ const config = {
   clientOrigin: env.CLIENT_ORIGIN.replace(/\/+$/, ""),
   apiPublicUrl: env.API_PUBLIC_URL.replace(/\/$/, ""),
   cookieName: "askyra_session",
-  cookieSecure: env.NODE_ENV === "production",
-  cookieSameSite: env.NODE_ENV === "production" ? "none" : "lax",
+  cookieSecure: env.NODE_ENV === "production" || process.env.VERCEL === "1",
+  cookieSameSite:
+    env.NODE_ENV === "production" || process.env.VERCEL === "1"
+      ? "none"
+      : "lax",
   paymentMode: env.PAYMENT_MODE,
   khaltiSecretKey: env.KHALTI_SECRET_KEY,
   khaltiBaseUrl: env.KHALTI_BASE_URL.replace(/\/$/, ""),

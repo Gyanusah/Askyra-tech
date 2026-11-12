@@ -23,15 +23,11 @@ const features = [
 
 export default function Login() {
   const { role: routeRole } = useParams();
-  const initialRole = ["student", "company", "admin"].includes(
-    routeRole?.toLowerCase(),
-  )
-    ? routeRole.toLowerCase()
-    : "student";
+  const isAdminLogin = routeRole?.toLowerCase() === "admin";
+  const accountType = isAdminLogin ? "admin" : "student";
   const [activeTab, setActiveTab] = useState(
-    initialRole === "admin" || routeRole ? "login" : "signup",
+    isAdminLogin || routeRole ? "login" : "signup",
   );
-  const [accountType, setAccountType] = useState(initialRole);
   const [showPassword, setShowPassword] = useState(false);
   const [agree, setAgree] = useState(false);
   const [message, setMessage] = useState("");
@@ -53,7 +49,6 @@ export default function Login() {
   };
 
   const switchTab = (tab) => {
-    if (accountType === "admin" && tab === "signup") return;
     setActiveTab(tab);
     setMessage("");
   };
@@ -166,7 +161,7 @@ export default function Login() {
         <section className="mx-auto w-full max-w-md rounded-xl border border-slate-200 bg-gradient-to-br from-white to-[#f5f9ff] p-5 shadow-[0_15px_60px_#00000035] sm:p-7 md:mx-0">
           {/* Login and Signup tabs */}
           <div className="mb-5 flex gap-7 border-b border-sky-100">
-            {["login", ...(accountType === "admin" ? [] : ["signup"])].map((tab) => (
+            {["login", ...(isAdminLogin ? [] : ["signup"])].map((tab) => (
               <button
                 key={tab}
                 type="button"
@@ -186,49 +181,17 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Account type */}
-            <div
-              className={`grid ${
-                activeTab === "login" ? "grid-cols-3" : "grid-cols-2"
-              } rounded-lg border border-sky-100 bg-sky-50 p-1`}
-            >
-              {(activeTab === "login"
-                ? ["student", "company", "admin"]
-                : ["student", "company"]
-              ).map((type) => (
-                <button
-                  type="button"
-                  key={type}
-                  onClick={() => {
-                    setAccountType(type);
-                    setMessage("");
-                  }}
-                  className={`rounded-md px-2 py-2.5 text-xs font-semibold capitalize transition ${
-                    accountType === type
-                      ? "bg-white text-sky-800 shadow-sm"
-                      : "text-slate-500 hover:text-sky-700"
-                  }`}
-                >
-                  {type === "admin" ? "Admin" : type}
-                </button>
-              ))}
-            </div>
-
             {/* Full name */}
             {activeTab === "signup" && (
               <label className="block text-xs font-semibold text-slate-700">
-                {accountType === "company" ? "Company Name" : "Full Name"}
+                Full Name
                 <span className="text-rose-500"> *</span>
                 <input
                   required
                   name="fullName"
                   value={form.fullName}
                   onChange={updateField}
-                  placeholder={
-                    accountType === "company"
-                      ? "Enter company name"
-                      : "Enter your name"
-                  }
+                  placeholder="Enter your name"
                   autoComplete="name"
                   className="mt-1.5 w-full rounded-lg border border-sky-100 bg-white px-3 py-3 text-xs font-normal outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
                 />
@@ -339,10 +302,10 @@ export default function Login() {
           <p className="mt-5 text-center text-xs text-slate-500">
             {activeTab === "signup"
               ? "Already have an account? "
-              : accountType === "admin"
+              : isAdminLogin
                 ? ""
                 : "Don't have an account? "}
-            {accountType !== "admin" && <button
+            {!isAdminLogin && <button
               type="button"
               onClick={() =>
                 switchTab(activeTab === "signup" ? "login" : "signup")

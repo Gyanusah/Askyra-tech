@@ -12,6 +12,8 @@ requests, and NPR payments.
 3. Copy `.env.example` to `.env`. Replace `JWT_SECRET`, `ADMIN_EMAIL`, and
    `ADMIN_PASSWORD` with private values. The admin password must be at least
    12 characters.
+    To email service request reference numbers, set `GMAIL_USER` and
+    `GMAIL_APP_PASSWORD` using a Gmail account and its Google app password.
 4. Set `MONGODB_URI` to your database connection string. Never commit `.env`.
    If Node.js reports `querySrv ECONNREFUSED`, optionally set
    `MONGODB_DNS_SERVERS` to comma-separated DNS resolver IP addresses reachable

@@ -49,6 +49,14 @@ const configSchema = z.object({
   PAYMENT_MODE: z.enum(["test", "live"]).default("test"),
   PAYMENT_CURRENCY: z.literal("NPR").default("NPR"),
   API_PUBLIC_URL: z.string().url(),
+  GMAIL_USER: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+    z.string().email().optional(),
+  ),
+  GMAIL_APP_PASSWORD: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() ? value.replace(/\s/g, "") : undefined),
+    z.string().length(16).optional(),
+  ),
   KHALTI_SECRET_KEY: z.string().default(""),
   KHALTI_BASE_URL: z.string().url().default("https://dev.khalti.com/api/v2"),
   ESEWA_MERCHANT_CODE: z.string().default(""),
@@ -72,6 +80,10 @@ if (!parsedConfig.success) {
   process.exit(1);
 }
 const env = parsedConfig.data;
+if (Boolean(env.GMAIL_USER) !== Boolean(env.GMAIL_APP_PASSWORD)) {
+  console.error("Set both GMAIL_USER and GMAIL_APP_PASSWORD to enable service request confirmation emails.");
+  process.exit(1);
+}
 if (env.MONGODB_DNS_SERVERS) {
   dns.setServers(env.MONGODB_DNS_SERVERS);
 }
@@ -89,6 +101,8 @@ const config = {
   jwtSecret: env.JWT_SECRET,
   clientOrigin: env.CLIENT_ORIGIN.replace(/\/+$/, ""),
   apiPublicUrl: env.API_PUBLIC_URL.replace(/\/$/, ""),
+  gmailUser: env.GMAIL_USER,
+  gmailAppPassword: env.GMAIL_APP_PASSWORD,
   cookieName: "askyra_session",
   cookieSecure: env.NODE_ENV === "production" || process.env.VERCEL === "1",
   cookieSameSite:

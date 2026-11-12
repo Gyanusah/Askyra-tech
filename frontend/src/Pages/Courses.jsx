@@ -18,7 +18,7 @@ import {
 const courses = [
   {
     id: 1,
-    title: "Ethical Hacking",
+    title: "Ethical Hacking & Penetration Testing",
     category: "Cybersecurity",
     level: "Advanced",
     duration: "6 Weeks",
@@ -28,20 +28,9 @@ const courses = [
     description:
       "Learn the fundamentals of ethical vulnerabilities, system security, and networks.",
   },
+
   {
     id: 2,
-    title: "Penetration Testing",
-    category: "Cybersecurity",
-    level: "Advanced",
-    duration: "4 Weeks",
-    price: 14999,
-    icon: ShieldCheck,
-    color: "blue",
-    description:
-      "Master the techniques used by ethical hackers and security professionals.",
-  },
-  {
-    id: 3,
     title: "SOC L1",
     category: "Cybersecurity",
     level: "Beginner",
@@ -52,41 +41,41 @@ const courses = [
     description: "Monitor, detect and respond to security incidents.",
   },
   {
-    id: 4,
+    id: 3,
     title: "MERN Stack",
     category: "Web Development",
     level: "Intermediate",
     duration: "6 Weeks",
-    price: 9999,
+    price: 19999,
     icon: BrainCircuit,
     color: "green",
     description:
       "Build full-stack web applications using MongoDB, Express, React, and Node.",
   },
   {
-    id: 5,
+    id: 4,
     title: "Full Stack Development",
     category: "Web Development",
     level: "Advanced",
     duration: "8 Weeks",
-    price: 12999,
+    price: 19999,
     icon: Code2,
     color: "teal",
     description: "End-to-end web development from frontend to backend.",
   },
   {
-    id: 6,
+    id: 5,
     title: "Frontend Development",
     category: "Web Development",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 4999,
+    price: 9999,
     icon: Code2,
     color: "cyan",
     description: "HTML, CSS, JavaScript, React, and modern UI development.",
   },
   {
-    id: 7,
+    id: 6,
     title: "Digital Marketing",
     category: "Digital Marketing",
     level: "Beginner",
@@ -97,7 +86,7 @@ const courses = [
     description: "Learn SEO, Google Ads, email marketing, and social media.",
   },
   {
-    id: 8,
+    id: 7,
     title: "Graphics Design",
     category: "Design",
     level: "Beginner",
@@ -108,7 +97,7 @@ const courses = [
     description: "Practice Photoshop, Figma, Canva, and visual design basics.",
   },
   {
-    id: 9,
+    id: 8,
     title: "Networking",
     category: "Networking",
     level: "Intermediate",

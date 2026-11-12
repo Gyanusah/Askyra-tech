@@ -1,6 +1,6 @@
 ﻿const courseDetails = {
   1: {
-    title: "Ethical Hacking",
+    title: "Ethical Hacking,Penetration Testing, and Vulnerability Assessment",
     category: "Cybersecurity",
     level: "Advanced",
     duration: "6 Weeks",
@@ -74,74 +74,8 @@
     ],
     trainerEmoji: "👨🏻‍💻",
   },
+
   2: {
-    title: "Penetration Testing",
-    category: "Cybersecurity",
-    level: "Advanced",
-    duration: "4 Weeks",
-    price: 25000,
-    overview:
-      "Practice a structured penetration-testing workflow using explicitly authorized training targets, with emphasis on validation and remediation.",
-    outcomes: [
-      "Define assessment scope, permission, and rules of engagement",
-      "Prioritize findings by risk and business impact",
-      "Validate issues in controlled training environments",
-      "Present remediation steps in a professional report",
-    ],
-    syllabus: [
-      [
-        "Networking",
-        "Understand core protocols, devices, and network communication patterns.",
-      ],
-      [
-        "Linux Fundamentals",
-        "Work confidently with shells, files, permissions, and remote access tools.",
-      ],
-      [
-        "Ethical Hacking Basics",
-        "Review core security concepts, laws, and risk-based testing practices.",
-      ],
-      [
-        "Reconnaissance and Scanning",
-        "Gather information and map targets in authorized environments.",
-      ],
-      [
-        "Enumeration and Vulnerability Analysis",
-        "Identify weaknesses and validate them with proper evidence.",
-      ],
-      [
-        "System Hacking and Reporting",
-        "Document findings and recommend remediation clearly.",
-      ],
-    ],
-    trainer: "Neha Kapoor",
-    trainerRole: "Application Security Consultant",
-    trainerBio:
-      "Helps teams assess application risk and turn verified findings into measurable security improvements.",
-    startDate: "22 November 2026",
-    schedule: "Tuesday - Saturday",
-    hours: "6:00 PM - 8:00 PM",
-    mode: "Online instructor-led",
-    certificate: "Yes",
-    rating: "4.7",
-    reviewCount: 86,
-    reviews: [
-      {
-        name: "Aarav P.",
-        rating: 5,
-        comment:
-          "The structured testing workflow and reporting exercises helped me understand how to communicate findings clearly.",
-      },
-      {
-        name: "Nisha R.",
-        rating: 4,
-        comment:
-          "I especially liked practicing in controlled labs and learning how to prioritize issues by risk.",
-      },
-    ],
-    trainerEmoji: "👩🏻‍💻",
-  },
-  3: {
     title: "SOC L1",
     category: "Cybersecurity",
     level: "Beginner",
@@ -200,7 +134,7 @@
     ],
     trainerEmoji: "👨🏽‍💼",
   },
-  4: {
+  3: {
     title: "MERN Stack",
     category: "Web Development",
     level: "Intermediate",
@@ -253,7 +187,7 @@
     ],
     trainerEmoji: "👩🏻‍💻",
   },
-  5: {
+  4: {
     title: "Full Stack Development",
     category: "Web Development",
     level: "Advanced",
@@ -309,7 +243,7 @@
     ],
     trainerEmoji: "👨🏻‍💻",
   },
-  6: {
+  5: {
     title: "Frontend Development",
     category: "Web Development",
     level: "Beginner",
@@ -368,7 +302,7 @@
     ],
     trainerEmoji: "👩🏽‍💻",
   },
-  7: {
+  6: {
     title: "Digital Marketing",
     category: "Digital Marketing",
     level: "Beginner",
@@ -427,7 +361,7 @@
     ],
     trainerEmoji: "👩🏻‍💼",
   },
-  8: {
+  7: {
     title: "Graphics Design",
     category: "Design",
     level: "Beginner",
@@ -486,7 +420,7 @@
     ],
     trainerEmoji: "👩🏻‍🎨",
   },
-  9: {
+  8: {
     title: "Networking",
     category: "Networking",
     level: "Intermediate",

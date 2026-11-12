@@ -1,4 +1,5 @@
 import { z } from "zod";
+import nodemailer from "nodemailer";
 import { courses, services } from "../data/catalog.js";
 import { Enrollment, Payment, ServiceRequest } from "../models/index.js";
 import { invoiceNumber } from "./payments.routes.js";
@@ -22,6 +23,15 @@ const serviceInput = z.object({
 
 export function createCommerceRouter(express, config) {
   const router = express.Router();
+  const emailTransport = config.gmailUser && config.gmailAppPassword
+    ? nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: config.gmailUser,
+          pass: config.gmailAppPassword,
+        },
+      })
+    : null;
 
   router.get("/courses", (_req, res) => res.json({ courses }));
   router.get("/services", (_req, res) => res.json({ services }));
@@ -70,12 +80,32 @@ export function createCommerceRouter(express, config) {
     if (!services.includes(input.data.service)) {
       return res.status(400).json({ error: "Choose a service from the service catalog." });
     }
+    if (!emailTransport) {
+      return res.status(503).json({ error: "Service request email delivery is not configured. Please contact AskYRA Tech." });
+    }
 
     const serviceRequest = await ServiceRequest.create({
       user: req.user?.role === "company" ? req.user.id : null,
       ...input.data,
     });
-    return res.status(201).json({ serviceRequest });
+    const reference = String(serviceRequest._id);
+    try {
+      await emailTransport.sendMail({
+        from: `AskYRA Tech <${config.gmailUser}>`,
+        to: serviceRequest.email,
+        subject: "AskYRA Tech service request reference",
+        text: `Hello ${serviceRequest.companyName},\n\nWe received your request for ${serviceRequest.service}.\nYour reference number is ${reference}.\n\nOur team will follow up with you soon.\n\nAskYRA Tech`,
+      });
+    } catch (error) {
+      console.error("Service request confirmation email failed:", error);
+      return res.status(502).json({
+        error: "Your request was saved, but the reference email could not be sent. Please contact AskYRA Tech and do not submit the request again.",
+      });
+    }
+    return res.status(201).json({
+      message: "Service request submitted. The reference number was emailed.",
+      email: serviceRequest.email,
+    });
   }));
 
   return router;

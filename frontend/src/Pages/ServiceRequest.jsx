@@ -31,7 +31,8 @@ export default function ServiceRequest() {
     position: "",
     service: services.includes(requestedService) ? requestedService : "",
   });
-  const [submittedRequest, setSubmittedRequest] = useState(null);
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const [emailFailure, setEmailFailure] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
   function updateForm(event) {
@@ -43,13 +44,14 @@ export default function ServiceRequest() {
     event.preventDefault();
     setSubmitError("");
     try {
-      const { serviceRequest } = await apiFetch("/service-requests", {
+      const { email } = await apiFetch("/service-requests", {
         method: "POST",
         body: JSON.stringify(form),
       });
-      setSubmittedRequest(serviceRequest);
+      setSubmittedEmail(email);
     } catch (error) {
       setSubmitError(error.message);
+      setEmailFailure(error.status === 502);
     }
   }
 
@@ -77,7 +79,7 @@ export default function ServiceRequest() {
           </p>
         </div>
 
-        {submittedRequest ? (
+        {submittedEmail ? (
           <div
             role="status"
             className="rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-emerald-800"
@@ -85,8 +87,8 @@ export default function ServiceRequest() {
             <CheckCircle2 size={26} className="mb-2" />
             <h2 className="font-bold">Service request submitted!</h2>
             <p className="mt-2 text-sm leading-6">
-              Request reference: {submittedRequest._id}. Our team will contact
-              you at {submittedRequest.email}.
+              We sent your request reference to {submittedEmail}. Our team will
+              follow up with you soon.
             </p>
             <Link
               to="/services"
@@ -95,6 +97,13 @@ export default function ServiceRequest() {
               Explore more services <ArrowRight size={15} />
             </Link>
           </div>
+        ) : emailFailure ? (
+          <p
+            role="alert"
+            className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900"
+          >
+            {submitError}
+          </p>
         ) : (
           <form onSubmit={submitRequest} className="space-y-4">
             <label className="block text-xs font-semibold text-slate-700">

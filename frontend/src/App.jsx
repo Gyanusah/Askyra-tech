@@ -5,7 +5,7 @@ import Courses from "./Pages/Courses";
 import Services from "./Pages/Services";
 import ServiceRequest from "./Pages/ServiceRequest";
 import Dashboard from "./Pages/Dashboard";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Footer from "./Components/Footer";
 import Register from "./Pages/Register";
 import Login from "./Pages/Login";
@@ -24,7 +24,9 @@ function App() {
         <Route path="/service-request" element={<ServiceRequest />} />
         <Route path="/dashboard/:role" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/login/:role" element={<Login />} />
+        <Route path="/login/student" element={<Login />} />
+        <Route path="/login/admin" element={<Login />} />
+        <Route path="/login/company" element={<Navigate to="/service-request" replace />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/:role" element={<Register />} />
         <Route path="/signup" element={<Register />} />

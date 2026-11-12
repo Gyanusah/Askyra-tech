@@ -143,7 +143,9 @@ export default function Login() {
           </p>
 
           <div className="mt-7 w-full max-w-sm">
-            <h2 className="text-lg font-extrabold">Join AskYra Tech</h2>
+            <h2 className="text-lg font-extrabold">
+              {isAdminLogin ? "Administrator Login" : "Join AskYra Tech"}
+            </h2>
             <div className="mt-5 space-y-4">
               {features.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-3 text-left">

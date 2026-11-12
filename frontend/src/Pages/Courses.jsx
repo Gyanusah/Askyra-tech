@@ -22,7 +22,7 @@ const courses = [
     category: "Cybersecurity",
     level: "Advanced",
     duration: "6 Weeks",
-    price: 199,
+    price: 19999,
     icon: ShieldCheck,
     color: "cyan",
     description:
@@ -34,7 +34,7 @@ const courses = [
     category: "Cybersecurity",
     level: "Advanced",
     duration: "4 Weeks",
-    price: 249,
+    price: 14999,
     icon: ShieldCheck,
     color: "blue",
     description:
@@ -46,7 +46,7 @@ const courses = [
     category: "Cybersecurity",
     level: "Beginner",
     duration: "6 Weeks",
-    price: 299,
+    price: 14999,
     icon: ShieldCheck,
     color: "indigo",
     description: "Monitor, detect and respond to security incidents.",
@@ -57,7 +57,7 @@ const courses = [
     category: "Web Development",
     level: "Intermediate",
     duration: "6 Weeks",
-    price: 349,
+    price: 9999,
     icon: BrainCircuit,
     color: "green",
     description:
@@ -69,7 +69,7 @@ const courses = [
     category: "Web Development",
     level: "Advanced",
     duration: "8 Weeks",
-    price: 299,
+    price: 12999,
     icon: Code2,
     color: "teal",
     description: "End-to-end web development from frontend to backend.",
@@ -80,7 +80,7 @@ const courses = [
     category: "Web Development",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 199,
+    price: 4999,
     icon: Code2,
     color: "cyan",
     description: "HTML, CSS, JavaScript, React, and modern UI development.",
@@ -91,7 +91,7 @@ const courses = [
     category: "Digital Marketing",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 149,
+    price: 9999,
     icon: ChartNoAxesCombined,
     color: "orange",
     description: "Learn SEO, Google Ads, email marketing, and social media.",
@@ -102,7 +102,7 @@ const courses = [
     category: "Design",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 149,
+    price: 9999,
     icon: Palette,
     color: "lime",
     description: "Practice Photoshop, Figma, Canva, and visual design basics.",
@@ -113,7 +113,7 @@ const courses = [
     category: "Networking",
     level: "Intermediate",
     duration: "6 Weeks",
-    price: 199,
+    price: 14999,
     icon: Network,
     color: "purple",
     description:
@@ -382,7 +382,6 @@ function Courses() {
         </span>
         <span>Learn • Build • Secure • Grow</span>
       </footer>
-
     </div>
   );
 }

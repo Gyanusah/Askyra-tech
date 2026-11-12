@@ -174,7 +174,7 @@ export default function CourseDetails() {
                   Meet Your Trainer
                 </h2>
                 <div className="flex items-center gap-3">
-                  <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-sky-100 bg-gradient-to-br from-amber-100 to-slate-300 text-2xl">
+                  <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full border-2 border-sky-100 bg-linear-to-br from-amber-100 to-slate-300 text-2xl">
                     {course.trainerEmoji}
                   </div>
                   <div>
@@ -244,7 +244,7 @@ export default function CourseDetails() {
           <section className="rounded-xl border border-sky-100 bg-white p-6">
             <h2 className="text-base font-extrabold">Meet Your Trainer</h2>
             <div className="mt-5 flex flex-col gap-4 sm:flex-row">
-              <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-gradient-to-br from-amber-100 to-slate-300 text-4xl">
+              <div className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-linear-to-br from-amber-100 to-slate-300 text-4xl">
                 {course.trainerEmoji}
               </div>
               <div>
@@ -292,14 +292,43 @@ export default function CourseDetails() {
                   ))}
                 </div>
                 <p className="mt-1 text-xs text-slate-500">
-                  {course.reviewCount} reviews · Sample data
+                  {course.reviewCount} sample reviews
                 </p>
               </div>
             </div>
-            <p className="mt-4 text-sm leading-6 text-slate-600">
-              Student reviews can be displayed here when connected to your
-              backend.
-            </p>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              {course.reviews.map((review) => (
+                <article
+                  key={review.name}
+                  className="rounded-lg border border-sky-100 bg-sky-50/50 p-4"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-bold text-slate-800">
+                      {review.name}
+                    </h3>
+                    <div
+                      className="flex text-amber-400"
+                      aria-label={`${review.rating} out of 5 stars`}
+                    >
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star
+                          key={n}
+                          size={14}
+                          className={
+                            n <= review.rating
+                              ? "fill-current"
+                              : "text-slate-300"
+                          }
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-600">
+                    {review.comment}
+                  </p>
+                </article>
+              ))}
+            </div>
           </section>
         )}
 
@@ -330,7 +359,7 @@ export default function CourseDetails() {
               aria-hidden="true"
               className="absolute bottom-0 right-7 hidden h-36 w-32 items-end justify-center sm:flex"
             >
-              <div className="relative h-28 w-20 rounded-t-[45%] border border-cyan-900 bg-gradient-to-b from-slate-700 to-[#020914]">
+              <div className="relative h-28 w-20 rounded-t-[45%] border border-cyan-900 bg-linear-to-b from-slate-700 to-[#020914]">
                 <div className="absolute left-3 top-4 h-12 w-14 rounded-t-[50%] border border-cyan-800 bg-[#061a2b]" />
                 <Laptop
                   className="absolute -left-5 bottom-2 text-cyan-400"
@@ -343,7 +372,7 @@ export default function CourseDetails() {
         </section>
 
         {/* Light promotional banner */}
-        <section className="relative mt-5 overflow-hidden rounded-xl border border-sky-100 bg-gradient-to-r from-white via-sky-50 to-[#d9eff9] p-5 sm:p-7">
+        <section className="relative mt-5 overflow-hidden rounded-xl border border-sky-100 bg-linear-to-r from-white via-sky-50 to-[#d9eff9] p-5 sm:p-7">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(ellipse_at_80%_70%,#93c5fd70,transparent_65%)]"
@@ -365,7 +394,7 @@ export default function CourseDetails() {
             aria-hidden="true"
             className="absolute bottom-0 right-6 hidden h-28 w-24 items-end justify-center sm:flex"
           >
-            <div className="relative h-24 w-16 rounded-t-[45%] border border-slate-400/60 bg-gradient-to-b from-slate-600 to-slate-950">
+            <div className="relative h-24 w-16 rounded-t-[45%] border border-slate-400/60 bg-linear-to-b from-slate-600 to-slate-950">
               <div className="absolute -left-2 top-1 h-8 w-20 -rotate-12 rounded-t-full border border-slate-400 bg-slate-800" />
               <Laptop
                 className="absolute -left-4 bottom-2 text-sky-700"

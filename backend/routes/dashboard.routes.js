@@ -118,6 +118,9 @@ export function createDashboardRouter(express) {
     if (!input.success) return res.status(400).json({ error: "Provide a valid invoice amount in NPR." });
     const request = await ServiceRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ error: "Service request not found." });
+    if (!request.user) {
+      return res.status(409).json({ error: "Invoices are available only for requests linked to a company account." });
+    }
     const payment = await Payment.create({
       user: request.user,
       serviceRequest: request.id,

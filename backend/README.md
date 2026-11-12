@@ -49,7 +49,7 @@ pool sizing has been assumed for this small local deployment.
 - `GET /api/dashboard/admin`: account, enrollment, service, and payment records.
 - `GET /api/courses`, `GET /api/services`: public catalog data.
 - `POST /api/enrollments`: signed-in students enroll in a catalog course.
-- `POST /api/service-requests`: signed-in companies submit a service request.
+- `POST /api/service-requests`: submit a service request without signing in. Include company name, email, phone, service, and the service recipient's name, email, and position. Signed-in companies' requests are linked to their account.
 - `PATCH /api/admin/enrollments/:id/progress`: update enrollment progress.
 - `PATCH /api/admin/service-requests/:id`: update status, progress, and milestone.
 - `POST /api/admin/service-requests/:id/invoice`: create an NPR service invoice.

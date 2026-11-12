@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown } from "lucide-react";
 import { apiFetch } from "../lib/api";
@@ -22,41 +22,17 @@ const inputClass =
 export default function ServiceRequest() {
   const [searchParams] = useSearchParams();
   const requestedService = searchParams.get("service") ?? "";
-  const [user, setUser] = useState(null);
-  const [authError, setAuthError] = useState("");
-  const [loadingUser, setLoadingUser] = useState(true);
   const [form, setForm] = useState({
-    contactPerson: "",
+    companyName: "",
+    email: "",
     phone: "",
+    contactPerson: "",
+    contactEmail: "",
+    position: "",
     service: services.includes(requestedService) ? requestedService : "",
-    details: "",
   });
   const [submittedRequest, setSubmittedRequest] = useState(null);
   const [submitError, setSubmitError] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    apiFetch("/auth/me")
-      .then(({ user: currentUser }) => {
-        if (!active) return;
-        setUser(currentUser);
-        if (currentUser?.role === "company") {
-          setForm((current) => ({
-            ...current,
-            contactPerson: current.contactPerson || currentUser.name,
-          }));
-        }
-      })
-      .catch((error) => {
-        if (active) setAuthError(error.message);
-      })
-      .finally(() => {
-        if (active) setLoadingUser(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   function updateForm(event) {
     const { name, value } = event.target;
@@ -96,32 +72,12 @@ export default function ServiceRequest() {
             Request a Service
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Tell us about your business and project. Our team will review your
-            requirements and follow up.
+            Share your company and contact details. Our team will review your
+            request and follow up.
           </p>
         </div>
 
-        {loadingUser ? (
-          <p className="rounded-lg bg-sky-50 p-4 text-sm text-slate-600">
-            Checking your company account…
-          </p>
-        ) : user?.role !== "company" ? (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-amber-900">
-            <h2 className="font-bold">Company account required</h2>
-            <p className="mt-2 text-sm leading-6">
-              Sign in or create a company account before submitting a request.
-              {authError && authError !== "Sign in to continue."
-                ? ` ${authError}`
-                : ""}
-            </p>
-            <Link
-              to="/login/company"
-              className="mt-4 inline-flex items-center gap-2 rounded-md bg-sky-700 px-4 py-2 text-xs font-bold text-white"
-            >
-              Continue as a company <ArrowRight size={14} />
-            </Link>
-          </div>
-        ) : submittedRequest ? (
+        {submittedRequest ? (
           <div
             role="status"
             className="rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-emerald-800"
@@ -129,36 +85,45 @@ export default function ServiceRequest() {
             <CheckCircle2 size={26} className="mb-2" />
             <h2 className="font-bold">Service request submitted!</h2>
             <p className="mt-2 text-sm leading-6">
-              Request reference: {submittedRequest._id}. You can follow updates
-              from your company dashboard.
+              Request reference: {submittedRequest._id}. Our team will contact
+              you at {submittedRequest.email}.
             </p>
             <Link
-              to="/dashboard/company"
+              to="/services"
               className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-sky-800 hover:text-cyan-700"
             >
-              Return to services <ArrowRight size={15} />
+              Explore more services <ArrowRight size={15} />
             </Link>
           </div>
         ) : (
           <form onSubmit={submitRequest} className="space-y-4">
-            <p className="rounded-lg bg-sky-50 p-3 text-xs text-slate-600">
-              Submitting as <strong>{user?.companyName || user?.name}</strong> ·{" "}
-              {user?.email}
-            </p>
             <label className="block text-xs font-semibold text-slate-700">
-              Contact person <span className="text-rose-500">*</span>
+              Company name <span className="text-rose-500">*</span>
               <input
                 required
-                name="contactPerson"
-                value={form.contactPerson}
+                name="companyName"
+                value={form.companyName}
                 onChange={updateForm}
-                autoComplete="name"
-                placeholder="Enter your name"
+                autoComplete="organization"
+                placeholder="Enter company name"
                 className={inputClass}
               />
             </label>
 
             <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-xs font-semibold text-slate-700">
+                Company email <span className="text-rose-500">*</span>
+                <input
+                  required
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={updateForm}
+                  autoComplete="email"
+                  placeholder="name@company.com"
+                  className={inputClass}
+                />
+              </label>
               <label className="block text-xs font-semibold text-slate-700">
                 Phone <span className="text-rose-500">*</span>
                 <input
@@ -202,18 +167,48 @@ export default function ServiceRequest() {
               </span>
             </label>
 
+            <h2 className="border-t border-sky-100 pt-4 text-sm font-bold text-slate-800">
+              Person taking the service
+            </h2>
             <label className="block text-xs font-semibold text-slate-700">
-              Project details <span className="text-rose-500">*</span>
-              <textarea
+              Name <span className="text-rose-500">*</span>
+              <input
                 required
-                name="details"
-                value={form.details}
+                name="contactPerson"
+                value={form.contactPerson}
                 onChange={updateForm}
-                rows={5}
-                placeholder="Describe your goals, requirements, and timeline..."
-                className={`${inputClass} min-h-28 resize-y`}
+                autoComplete="name"
+                placeholder="Enter their name"
+                className={inputClass}
               />
             </label>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-xs font-semibold text-slate-700">
+                Email <span className="text-rose-500">*</span>
+                <input
+                  required
+                  type="email"
+                  name="contactEmail"
+                  value={form.contactEmail}
+                  onChange={updateForm}
+                  autoComplete="email"
+                  placeholder="name@example.com"
+                  className={inputClass}
+                />
+              </label>
+              <label className="block text-xs font-semibold text-slate-700">
+                Position <span className="text-rose-500">*</span>
+                <input
+                  required
+                  name="position"
+                  value={form.position}
+                  onChange={updateForm}
+                  autoComplete="organization-title"
+                  placeholder="Enter their position"
+                  className={inputClass}
+                />
+              </label>
+            </div>
 
             {submitError && (
               <p
@@ -230,9 +225,6 @@ export default function ServiceRequest() {
             >
               Submit Request <ArrowRight size={16} />
             </button>
-            <p className="text-center text-[11px] leading-5 text-slate-500">
-              Demo form only. No data is sent to a server.
-            </p>
           </form>
         )}
       </section>

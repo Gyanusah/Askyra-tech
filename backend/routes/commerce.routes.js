@@ -11,10 +11,13 @@ const enrollmentInput = z.object({
 });
 
 const serviceInput = z.object({
+  companyName: z.string().trim().min(2).max(160),
+  email: z.string().trim().email().max(254),
+  phone: z.string().trim().min(5).max(32),
   service: z.string().min(1).max(120),
   contactPerson: z.string().trim().min(2).max(120),
-  phone: z.string().trim().min(5).max(32),
-  details: z.string().trim().min(10).max(5000),
+  contactEmail: z.string().trim().email().max(254),
+  position: z.string().trim().min(2).max(120),
 });
 
 export function createCommerceRouter(express, config) {
@@ -61,21 +64,16 @@ export function createCommerceRouter(express, config) {
     }
   }));
 
-  router.post("/service-requests", requireAuth(config), requireRole("company"), asyncRoute(async (req, res) => {
+  router.post("/service-requests", requireAuth(config, { optional: true }), asyncRoute(async (req, res) => {
     const input = serviceInput.safeParse(req.body);
-    if (!input.success) return res.status(400).json({ error: "Provide a service, contact name, phone, and project details." });
+    if (!input.success) return res.status(400).json({ error: "Provide valid company and service contact details." });
     if (!services.includes(input.data.service)) {
       return res.status(400).json({ error: "Choose a service from the service catalog." });
     }
 
     const serviceRequest = await ServiceRequest.create({
-      user: req.user.id,
-      companyName: req.user.companyName || req.user.name,
-      contactPerson: input.data.contactPerson,
-      email: req.user.email,
-      phone: input.data.phone,
-      service: input.data.service,
-      details: input.data.details,
+      user: req.user?.role === "company" ? req.user.id : null,
+      ...input.data,
     });
     return res.status(201).json({ serviceRequest });
   }));

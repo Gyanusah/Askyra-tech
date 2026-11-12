@@ -184,10 +184,11 @@ export default function AdminDashboard({ user }) {
                       <h3 className="text-sm font-bold text-slate-900">{service.service}</h3>
                       <p className="mt-1 text-xs text-slate-600">{service.companyName} · {service.contactPerson}</p>
                       <p className="text-[11px] text-slate-500">{service.email} · {service.phone}</p>
+                      <p className="text-[11px] text-slate-500">{service.contactEmail} · {service.position}</p>
                     </div>
                     <PaymentStatus status={service.status} />
                   </div>
-                  <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-slate-600">{service.details}</p>
+                  {service.details && <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-slate-600">{service.details}</p>}
                   <div className="mt-3"><Progress value={service.progress} /></div>
                   <p className="mt-2 text-[11px] text-slate-500">Milestone: {service.milestone} · Account: {company?.email ?? "—"}</p>
                   <form
@@ -234,7 +235,7 @@ export default function AdminDashboard({ user }) {
                     <button disabled={busy === key} className="rounded bg-sky-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Save update</button>
                     <span className="text-[10px] text-slate-500">{messages[key]}</span>
                   </form>
-                  <form
+                  {service.user ? <form
                     className="mt-3 flex flex-wrap items-center gap-2"
                     onSubmit={(event) => {
                       event.preventDefault();
@@ -256,7 +257,7 @@ export default function AdminDashboard({ user }) {
                       {busy === `invoice-${service._id}` ? "Creating…" : "Issue invoice"}
                     </button>
                     {messages[`invoice-${service._id}`] && <span role="status" className="text-[10px] text-emerald-700">{messages[`invoice-${service._id}`]}</span>}
-                  </form>
+                  </form> : <p className="mt-3 text-[11px] text-slate-500">Invoice creation is available for requests linked to a company account.</p>}
                 </article>
               );
             })}

@@ -32,13 +32,15 @@ enrollmentSchema.index({ user: 1, courseId: 1 }, { unique: true });
 
 const serviceRequestSchema = new Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", default: null, index: true },
     companyName: { type: String, required: true, trim: true, maxlength: 160 },
     contactPerson: { type: String, required: true, trim: true, maxlength: 120 },
     email: { type: String, required: true, lowercase: true, trim: true },
+    contactEmail: { type: String, lowercase: true, trim: true, default: "" },
+    position: { type: String, trim: true, maxlength: 120, default: "" },
     phone: { type: String, required: true, trim: true, maxlength: 32 },
     service: { type: String, required: true, maxlength: 120 },
-    details: { type: String, required: true, maxlength: 5000 },
+    details: { type: String, default: "", maxlength: 5000 },
     status: { type: String, enum: ["submitted", "reviewing", "in_progress", "completed", "rejected"], default: "submitted" },
     progress: { type: Number, min: 0, max: 100, default: 0 },
     milestone: { type: String, default: "Request received", maxlength: 240 },

@@ -12,8 +12,9 @@ requests, and NPR payments.
 3. Copy `.env.example` to `.env`. Replace `JWT_SECRET`, `ADMIN_EMAIL`, and
    `ADMIN_PASSWORD` with private values. The admin password must be at least
    12 characters.
-    To email service request reference numbers, set `GMAIL_USER` and
-    `GMAIL_APP_PASSWORD` using a Gmail account and its Google app password.
+    To enable signup email verification and service request reference emails,
+    set `GMAIL_USER` and `GMAIL_APP_PASSWORD` using a Gmail account and its
+    Google app password.
 4. Set `MONGODB_URI` to your database connection string. Never commit `.env`.
    If Node.js reports `querySrv ECONNREFUSED`, optionally set
    `MONGODB_DNS_SERVERS` to comma-separated DNS resolver IP addresses reachable
@@ -36,8 +37,17 @@ pool sizing has been assumed for this small local deployment.
 
 ## Authentication and access
 
-- `POST /api/auth/signup`: create a student or company account.
+- `POST /api/auth/signup`: create a student or company account and email a
+  six-digit verification code. Codes expire after 10 minutes and allow at most
+  five attempts.
+- `POST /api/auth/verify-email`: verify the code and start a session.
+- `POST /api/auth/resend-verification`: send a fresh code for an unverified
+  account.
 - `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`.
+- New passwords must be at least 12 characters and contain uppercase and
+  lowercase letters, a number, and a symbol. Passwords are hashed with bcrypt
+  on the server; clients must send the original password over HTTPS, not a
+  client-generated hash or encrypted value.
 - Successful authentication uses an HTTP-only 12-hour session cookie.
 - Admin registration is disabled. The first admin account is bootstrapped from
   `ADMIN_EMAIL` and `ADMIN_PASSWORD` at startup.

@@ -50,11 +50,15 @@ const configSchema = z.object({
   PAYMENT_CURRENCY: z.literal("NPR").default("NPR"),
   API_PUBLIC_URL: z.string().url(),
   GMAIL_USER: z.preprocess(
-    (value) => (typeof value === "string" && value.trim() ? value.trim() : undefined),
+    (value) =>
+      typeof value === "string" && value.trim() ? value.trim() : undefined,
     z.string().email().optional(),
   ),
   GMAIL_APP_PASSWORD: z.preprocess(
-    (value) => (typeof value === "string" && value.trim() ? value.replace(/\s/g, "") : undefined),
+    (value) =>
+      typeof value === "string" && value.trim()
+        ? value.replace(/\s/g, "")
+        : undefined,
     z.string().length(16).optional(),
   ),
   KHALTI_SECRET_KEY: z.string().default(""),
@@ -81,7 +85,9 @@ if (!parsedConfig.success) {
 }
 const env = parsedConfig.data;
 if (Boolean(env.GMAIL_USER) !== Boolean(env.GMAIL_APP_PASSWORD)) {
-  console.error("Set both GMAIL_USER and GMAIL_APP_PASSWORD to enable service request confirmation emails.");
+  console.error(
+    "Set both GMAIL_USER and GMAIL_APP_PASSWORD to enable service request confirmation emails.",
+  );
   process.exit(1);
 }
 if (env.MONGODB_DNS_SERVERS) {
@@ -207,28 +213,28 @@ async function bootstrapAdmin() {
   // console.info(`Bootstrapped administrator account for ${email}.`);
 }
 
-let server;
-async function start() {
-  await mongoose.connect(env.MONGODB_URI);
-  await bootstrapAdmin();
-  server = app.listen(env.PORT, () => {
-    console.info(
-      `AskYRA API listening on port ${env.PORT} (${env.NODE_ENV}, payments: ${env.PAYMENT_MODE}).`,
-    );
-  });
-}
+// let server;
+// async function start() {
+//   await mongoose.connect(env.MONGODB_URI);
+//   await bootstrapAdmin();
+//   server = app.listen(env.PORT, () => {
+//     console.info(
+//       `AskYRA API listening on port ${env.PORT} (${env.NODE_ENV}, payments: ${env.PAYMENT_MODE}).`,
+//     );
+//   });
+// }
 
-async function shutdown(signal) {
-  console.info(`${signal} received; closing API and database connections.`);
-  if (server) await new Promise((resolve) => server.close(resolve));
-  await mongoose.disconnect();
-  process.exit(0);
-}
+// async function shutdown(signal) {
+//   console.info(`${signal} received; closing API and database connections.`);
+//   if (server) await new Promise((resolve) => server.close(resolve));
+//   await mongoose.disconnect();
+//   process.exit(0);
+// }
 
-process.on("SIGINT", () => void shutdown("SIGINT"));
-process.on("SIGTERM", () => void shutdown("SIGTERM"));
+// process.on("SIGINT", () => void shutdown("SIGINT"));
+// process.on("SIGTERM", () => void shutdown("SIGTERM"));
 
-start().catch((error) => {
-  console.error("API startup failed:", error);
-  process.exit(1);
-});
+// start().catch((error) => {
+//   console.error("API startup failed:", error);
+//   process.exit(1);
+// });

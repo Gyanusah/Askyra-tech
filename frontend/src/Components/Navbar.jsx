@@ -8,7 +8,7 @@ const navItems = [
   { label: "Courses", to: "/courses" },
   { label: "Services", to: "/services" },
   { label: "Service Request", to: "/service-request" },
-  { label: "Register", to: "/register" },
+  // { label: "Register", to: "/register" },
   { label: "Contact", to: "/contact" },
 ];
 
@@ -78,9 +78,7 @@ export default function Navbar() {
             key={to}
             to={to}
             end={to === "/"}
-            className={({ isActive }) =>
-              `nav-link ${isActive ? "active" : ""}`
-            }
+            className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
             onClick={() => setMenuOpen(false)}
           >
             {label}

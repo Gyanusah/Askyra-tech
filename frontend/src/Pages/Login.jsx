@@ -32,6 +32,8 @@ export default function Login() {
   const [agree, setAgree] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
 
   const [form, setForm] = useState({
     fullName: "",
@@ -51,11 +53,29 @@ export default function Login() {
   const switchTab = (tab) => {
     setActiveTab(tab);
     setMessage("");
+    setVerificationPending(false);
+    setVerificationCode("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+
+    if (verificationPending) {
+      setLoading(true);
+      try {
+        const result = await apiFetch("/auth/verify-email", {
+          method: "POST",
+          body: JSON.stringify({ email: form.email, code: verificationCode }),
+        });
+        navigate(`/dashboard/${result.user.role}`, { replace: true });
+      } catch (error) {
+        setMessage(error.message || "Unable to verify your email.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
 
     if (activeTab === "signup" && !agree) {
       setMessage("Please agree to the Terms & Conditions.");
@@ -82,9 +102,30 @@ export default function Login() {
         method: "POST",
         body: JSON.stringify(payload),
       });
+      if (result.verificationRequired) {
+        setVerificationPending(true);
+        setMessage("A six-digit verification code has been sent to your email. It expires in 10 minutes.");
+        return;
+      }
       navigate(`/dashboard/${result.user.role}`, { replace: true });
     } catch (error) {
       setMessage(error.message || "Unable to connect to the account service.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendVerificationCode = async () => {
+    setLoading(true);
+    setMessage("");
+    try {
+      const result = await apiFetch("/auth/resend-verification", {
+        method: "POST",
+        body: JSON.stringify({ email: form.email }),
+      });
+      setMessage(result.message);
+    } catch (error) {
+      setMessage(error.message || "Unable to resend the verification code.");
     } finally {
       setLoading(false);
     }
@@ -183,6 +224,31 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {verificationPending ? (
+              <>
+                <p className="text-sm leading-6 text-slate-600">
+                  Enter the six-digit code sent to <strong>{form.email}</strong> to finish creating your account.
+                </p>
+                <label className="block text-xs font-semibold text-slate-700">
+                  Email verification code
+                  <input
+                    required
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    value={verificationCode}
+                    onChange={(event) => {
+                      setVerificationCode(event.target.value.replace(/\D/g, ""));
+                      setMessage("");
+                    }}
+                    placeholder="6-digit code"
+                    className="mt-1.5 w-full rounded-lg border border-sky-100 bg-white px-3 py-3 text-xs font-normal tracking-[.3em] outline-none transition placeholder:tracking-normal placeholder:text-slate-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+                  />
+                </label>
+              </>
+            ) : (
+              <>
             {/* Full name */}
             {activeTab === "signup" && (
               <label className="block text-xs font-semibold text-slate-700">
@@ -233,7 +299,9 @@ export default function Login() {
                   autoComplete={
                     activeTab === "signup" ? "new-password" : "current-password"
                   }
-                  minLength={8}
+                  minLength={activeTab === "signup" ? 12 : undefined}
+                  maxLength={activeTab === "signup" ? 72 : 128}
+                  pattern={activeTab === "signup" ? "(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{12,128}" : undefined}
                   className="mt-1.5 w-full rounded-lg border border-sky-100 bg-white px-3 py-3 pr-11 text-xs font-normal outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
                 />
                 <button
@@ -246,6 +314,11 @@ export default function Login() {
                 </button>
               </span>
             </label>
+            {activeTab === "signup" && (
+              <p className="-mt-2 text-[11px] leading-5 text-slate-500">
+                Use 12+ characters with uppercase and lowercase letters, a number, and a symbol.
+              </p>
+            )}
 
             {/* Role selection */}
             {activeTab === "signup" && (
@@ -281,9 +354,18 @@ export default function Login() {
                 </a>
               </div>
             )}
+              </>
+            )}
 
             {message && (
-              <div role="alert" className="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs leading-5 text-rose-800">
+              <div
+                role={verificationPending && message.startsWith("A six-digit") || message.startsWith("If email verification") ? "status" : "alert"}
+                className={`rounded-lg border p-3 text-xs leading-5 ${
+                  verificationPending && (message.startsWith("A six-digit") || message.startsWith("If email verification"))
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : "border-rose-100 bg-rose-50 text-rose-800"
+                }`}
+              >
                 {message}
               </div>
             )}
@@ -295,11 +377,37 @@ export default function Login() {
             >
               {loading
                 ? "Please wait..."
-                : activeTab === "signup"
+                : verificationPending
+                  ? "Verify email"
+                  : activeTab === "signup"
                   ? "Create Account"
                   : "Login"}
             </button>
           </form>
+
+          {verificationPending && (
+            <div className="mt-3 flex justify-center gap-4 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={resendVerificationCode}
+                disabled={loading}
+                className="text-sky-700 hover:text-cyan-600 disabled:opacity-60"
+              >
+                Resend code
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setVerificationPending(false);
+                  setVerificationCode("");
+                  setMessage("");
+                }}
+                className="text-sky-700 hover:text-cyan-600"
+              >
+                Use a different email
+              </button>
+            </div>
+          )}
 
           <p className="mt-5 text-center text-xs text-slate-500">
             {activeTab === "signup"

@@ -11,6 +11,10 @@ const userSchema = new Schema(
     phone: { type: String, trim: true, maxlength: 32, default: "" },
     companyName: { type: String, trim: true, maxlength: 160, default: "" },
     isActive: { type: Boolean, default: true },
+    isEmailVerified: { type: Boolean, default: true },
+    emailVerificationCodeHash: { type: String, select: false },
+    emailVerificationExpiresAt: { type: Date, select: false },
+    emailVerificationAttempts: { type: Number, default: 0, select: false },
   },
   { timestamps: true },
 );

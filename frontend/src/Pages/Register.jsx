@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { apiFetch } from "../lib/api";
+import { formatNPR } from "./DashboardShared";
 
 function submitEsewa(checkout) {
   const form = document.createElement("form");
@@ -150,7 +151,7 @@ export default function Register() {
               </option>
               {courses.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.title} · NPR {item.priceNPR}
+                  {item.title} · {formatNPR(item.priceNPR)}
                 </option>
               ))}
             </select>
@@ -163,7 +164,7 @@ export default function Register() {
                 {course.category} · {course.level} · {course.duration}
               </p>
               <p className="mt-3 text-lg font-extrabold text-sky-800">
-                NPR {course.priceNPR}
+                {formatNPR(course.priceNPR)}
               </p>
             </div>
           )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ShieldCheck,
@@ -17,6 +17,8 @@ import {
   BadgeCheck,
 } from "lucide-react";
 import courseDetails from "./courseDetailsData";
+import { apiFetch } from "../lib/api";
+import { formatNPR } from "./DashboardShared";
 
 const tabs = ["Overview", "Syllabus", "Trainer", "Schedule", "Reviews"];
 
@@ -24,7 +26,27 @@ export default function CourseDetails() {
   const { id } = useParams();
   const course = courseDetails[id];
   const [activeTab, setActiveTab] = useState("Overview");
+  const [priceResult, setPriceResult] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!course) return undefined;
+    let active = true;
+    apiFetch("/courses")
+      .then(({ courses }) => {
+        const catalogCourse = courses.find((item) => item.id === id);
+        if (!catalogCourse) throw new Error("Course price is unavailable.");
+        if (active) {
+          setPriceResult({ id, priceNPR: catalogCourse.priceNPR });
+        }
+      })
+      .catch((error) => {
+        if (active) setPriceResult({ id, error: error.message });
+      });
+    return () => {
+      active = false;
+    };
+  }, [course, id]);
 
   if (!course) {
     return (
@@ -46,6 +68,9 @@ export default function CourseDetails() {
       </main>
     );
   }
+
+  const currentPrice = priceResult?.id === id ? priceResult.priceNPR : null;
+  const currentPriceError = priceResult?.id === id ? priceResult.error : "";
 
   return (
     <div className="min-h-screen bg-[#f7fbff] font-sans text-slate-900">
@@ -71,7 +96,10 @@ export default function CourseDetails() {
             </div>
 
             <div className="mt-2 flex flex-wrap items-center gap-4 text-xs">
-              <strong className="text-cyan-300">NPR {course.price}</strong>
+              <strong className="text-cyan-300">
+                {currentPrice == null ? "Price unavailable" : formatNPR(currentPrice)}
+              </strong>
+              {currentPriceError && <span role="alert" className="text-rose-300">{currentPriceError}</span>}
               <span className="flex items-center gap-1 text-slate-300">
                 <Star size={13} className="fill-amber-400 text-amber-400" />
                 {course.rating} ({course.reviewCount} Reviews)

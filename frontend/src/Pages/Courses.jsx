@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search,
@@ -14,6 +14,8 @@ import {
   XCircle,
   Headset,
 } from "lucide-react";
+import { apiFetch } from "../lib/api";
+import { formatNPR } from "./DashboardShared";
 
 const courses = [
   {
@@ -22,7 +24,6 @@ const courses = [
     category: "Cybersecurity",
     level: "Advanced",
     duration: "6 Weeks",
-    price: 19999,
     icon: ShieldCheck,
     color: "cyan",
     description:
@@ -35,7 +36,6 @@ const courses = [
     category: "Cybersecurity",
     level: "Beginner",
     duration: "6 Weeks",
-    price: 14999,
     icon: ShieldCheck,
     color: "indigo",
     description: "Monitor, detect and respond to security incidents.",
@@ -46,7 +46,6 @@ const courses = [
     category: "Web Development",
     level: "Intermediate",
     duration: "6 Weeks",
-    price: 19999,
     icon: BrainCircuit,
     color: "green",
     description:
@@ -58,7 +57,6 @@ const courses = [
     category: "Web Development",
     level: "Advanced",
     duration: "8 Weeks",
-    price: 19999,
     icon: Code2,
     color: "teal",
     description: "End-to-end web development from frontend to backend.",
@@ -69,7 +67,6 @@ const courses = [
     category: "Web Development",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 9999,
     icon: Code2,
     color: "cyan",
     description: "HTML, CSS, JavaScript, React, and modern UI development.",
@@ -80,7 +77,6 @@ const courses = [
     category: "Digital Marketing",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 9999,
     icon: ChartNoAxesCombined,
     color: "orange",
     description: "Learn SEO, Google Ads, email marketing, and social media.",
@@ -91,7 +87,6 @@ const courses = [
     category: "Design",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 9999,
     icon: Palette,
     color: "lime",
     description: "Practice Photoshop, Figma, Canva, and visual design basics.",
@@ -102,7 +97,6 @@ const courses = [
     category: "Networking",
     level: "Intermediate",
     duration: "6 Weeks",
-    price: 14999,
     icon: Network,
     color: "purple",
     description:
@@ -157,7 +151,7 @@ function CourseCard({ course, onRegister }) {
           {course.duration}
         </span>
         <strong className="text-sm font-extrabold text-slate-900">
-          NPR {course.price}
+          {course.priceNPR == null ? "Price unavailable" : formatNPR(course.priceNPR)}
         </strong>
       </div>
       <Link
@@ -183,9 +177,31 @@ function CourseCard({ course, onRegister }) {
 function Courses() {
   const [category, setCategory] = useState("All");
   const [level, setLevel] = useState("All Levels");
+  const [catalogPrices, setCatalogPrices] = useState({});
+  const [priceError, setPriceError] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const search = searchParams.get("search") ?? "";
+
+  useEffect(() => {
+    let active = true;
+    apiFetch("/courses")
+      .then(({ courses: catalogCourses }) => {
+        if (!active) return;
+        setCatalogPrices(
+          Object.fromEntries(
+            catalogCourses.map((course) => [course.id, course.priceNPR]),
+          ),
+        );
+        setPriceError("");
+      })
+      .catch((error) => {
+        if (active) setPriceError(error.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function updateSearch(value) {
     setSearchParams(
@@ -204,7 +220,10 @@ function Courses() {
 
   const filteredCourses = useMemo(
     () =>
-      courses.filter((course) => {
+      courses.map((course) => ({
+        ...course,
+        priceNPR: catalogPrices[course.id],
+      })).filter((course) => {
         const matchesCategory =
           category === "All" || course.category === category;
         const matchesLevel = level === "All Levels" || course.level === level;
@@ -216,7 +235,7 @@ function Courses() {
             .includes(term);
         return matchesCategory && matchesLevel && matchesSearch;
       }),
-    [category, level, search],
+    [catalogPrices, category, level, search],
   );
 
   return (
@@ -302,6 +321,11 @@ function Courses() {
             </button>
           )}
         </div>
+        {priceError && (
+          <p role="alert" className="mb-4 rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs text-rose-800">
+            Current course prices could not be loaded: {priceError}
+          </p>
+        )}
 
         {filteredCourses.length ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">

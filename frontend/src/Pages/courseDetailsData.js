@@ -4,7 +4,6 @@
     category: "Cybersecurity",
     level: "Advanced",
     duration: "6 Weeks",
-    price: 20000,
     overview:
       "Learn security fundamentals and responsible assessment practices in instructor-guided, authorized lab environments.",
     outcomes: [
@@ -80,7 +79,6 @@
     category: "Cybersecurity",
     level: "Beginner",
     duration: "6 Weeks",
-    price: 15000,
     overview:
       "Build the foundations for a security operations role by learning alert triage, incident documentation, and escalation workflows.",
     outcomes: [
@@ -139,7 +137,6 @@
     category: "Web Development",
     level: "Intermediate",
     duration: "6 Weeks",
-    price: 25000,
     overview:
       "Create full-stack applications with MongoDB, Express, React, and Node.js, progressing from UI components to API and database integration.",
     outcomes: [
@@ -192,7 +189,6 @@
     category: "Web Development",
     level: "Advanced",
     duration: "8 Weeks",
-    price: 299,
     overview:
       "Learn end-to-end web development by designing, building, testing, and deploying a complete application across frontend and backend layers.",
     outcomes: [
@@ -248,7 +244,6 @@
     category: "Web Development",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 9999,
     overview:
       "Start building websites with HTML, CSS, and JavaScript, then use React to create interactive, accessible user interfaces.",
     outcomes: [
@@ -307,7 +302,6 @@
     category: "Digital Marketing",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 9999,
     overview:
       "Plan and measure digital campaigns across search, content, email, and social channels using clear goals and responsible marketing practices.",
     outcomes: [
@@ -366,7 +360,6 @@
     category: "Design",
     level: "Beginner",
     duration: "4 Weeks",
-    price: 14999,
     overview:
       "Develop visual design fundamentals and create practical assets and interface prototypes using tools such as Figma and Canva.",
     outcomes: [
@@ -425,7 +418,6 @@
     category: "Networking",
     level: "Intermediate",
     duration: "6 Weeks",
-    price: 9999,
     overview:
       "Understand how computer networks are structured, configured, and maintained, with guided practice in troubleshooting and documentation.",
     outcomes: [

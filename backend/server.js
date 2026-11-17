@@ -29,7 +29,10 @@ const configSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   PORT: z.coerce.number().int().positive().default(5000),
-  CLIENT_ORIGIN: z.string().url(),
+  CLIENT_ORIGIN: z
+    .string()
+    .transform((value) => value.split(",").map((origin) => origin.trim()))
+    .pipe(z.array(z.string().url()).min(1)),
   MONGODB_URI: z.string().min(1),
   MONGODB_DNS_SERVERS: z
     .string()
@@ -105,7 +108,7 @@ if (
 
 const config = {
   jwtSecret: env.JWT_SECRET,
-  clientOrigin: env.CLIENT_ORIGIN.replace(/\/+$/, ""),
+  clientOrigins: env.CLIENT_ORIGIN.map((origin) => origin.replace(/\/+$/, "")),
   apiPublicUrl: env.API_PUBLIC_URL.replace(/\/$/, ""),
   gmailUser: env.GMAIL_USER,
   gmailAppPassword: env.GMAIL_APP_PASSWORD,
@@ -127,18 +130,11 @@ const config = {
 const app = express();
 app.disable("x-powered-by");
 app.use(helmet());
-// app.use(
-//   cors({
-//     origin: env.CLIENT_ORIGIN,
-//     credentials: true,
-//     methods: ["GET", "POST", "PATCH", "OPTIONS"],
-//     allowedHeaders: ["Content-Type"],
-//   }),
-// );
 
 app.use(
   cors({
-    origin: config.clientOrigin,
+    origin: (origin, callback) =>
+      callback(null, !origin || config.clientOrigins.includes(origin)),
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -150,10 +146,15 @@ app.use(cookieParser());
 app.use("/api", (req, res, next) => {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
   const origin = req.get("origin");
-  if (origin && origin !== config.clientOrigin) {
+  if (origin && !config.clientOrigins.includes(origin)) {
     return res.status(403).json({ error: "Request origin is not allowed." });
   }
   return next();
+});
+app.use((req, _res, next) => {
+  ensureDatabase()
+    .then(() => next())
+    .catch(next);
 });
 
 app.get("/", (_req, res) => {
@@ -213,28 +214,46 @@ async function bootstrapAdmin() {
   // console.info(`Bootstrapped administrator account for ${email}.`);
 }
 
-// let server;
-// async function start() {
-//   await mongoose.connect(env.MONGODB_URI);
-//   await bootstrapAdmin();
-//   server = app.listen(env.PORT, () => {
-//     console.info(
-//       `AskYRA API listening on port ${env.PORT} (${env.NODE_ENV}, payments: ${env.PAYMENT_MODE}).`,
-//     );
-//   });
-// }
+let databaseReady;
+function ensureDatabase() {
+  if (!databaseReady) {
+    databaseReady = mongoose
+      .connect(env.MONGODB_URI)
+      .then(bootstrapAdmin)
+      .catch((error) => {
+        databaseReady = undefined;
+        throw error;
+      });
+  }
+  return databaseReady;
+}
 
-// async function shutdown(signal) {
-//   console.info(`${signal} received; closing API and database connections.`);
-//   if (server) await new Promise((resolve) => server.close(resolve));
-//   await mongoose.disconnect();
-//   process.exit(0);
-// }
+export default function handler(req, res) {
+  return app(req, res);
+}
 
-// process.on("SIGINT", () => void shutdown("SIGINT"));
-// process.on("SIGTERM", () => void shutdown("SIGTERM"));
+async function start() {
+  await ensureDatabase();
+  const server = app.listen(env.PORT, () => {
+    console.info(
+      `AskYRA API listening on port ${env.PORT} (${env.NODE_ENV}, payments: ${env.PAYMENT_MODE}).`,
+    );
+  });
 
-// start().catch((error) => {
-//   console.error("API startup failed:", error);
-//   process.exit(1);
-// });
+  async function shutdown(signal) {
+    console.info(`${signal} received; closing API and database connections.`);
+    await new Promise((resolve) => server.close(resolve));
+    await mongoose.disconnect();
+    process.exit(0);
+  }
+
+  process.on("SIGINT", () => void shutdown("SIGINT"));
+  process.on("SIGTERM", () => void shutdown("SIGTERM"));
+}
+
+if (process.env.VERCEL !== "1") {
+  start().catch((error) => {
+    console.error("API startup failed:", error);
+    process.exit(1);
+  });
+}

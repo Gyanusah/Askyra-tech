@@ -16,6 +16,9 @@ requests, and NPR payments.
     set `GMAIL_USER` and `GMAIL_APP_PASSWORD` using a Gmail account and its
     Google app password.
 4. Set `MONGODB_URI` to your database connection string. Never commit `.env`.
+   Set `CLIENT_ORIGIN` to the exact frontend origin; multiple origins can be
+   comma-separated. Configure the same value in the backend deployment's
+   environment variables.
    If Node.js reports `querySrv ECONNREFUSED`, optionally set
    `MONGODB_DNS_SERVERS` to comma-separated DNS resolver IP addresses reachable
    from your network (for example, `8.8.8.8,8.8.4.4` where permitted). This only

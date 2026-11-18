@@ -1,0 +1,253 @@
+ASKYRA TECH PROJECT GUIDE
+=========================
+
+Updated: 2026-11-17
+
+1. PROJECT OVERVIEW
+-------------------
+AskYRA Tech is a cybersecurity training and services website. It contains a
+React frontend and an Express/MongoDB API. The API handles account security,
+course enrollments, service requests, dashboards, and NPR payments.
+
+The backend is authoritative for course prices and payment amounts. Do not
+trust amounts submitted by the browser.
+
+2. TECHNOLOGY
+-------------
+Frontend:
+- React 19, React Router 7, Vite 8, Tailwind CSS 4
+- Lucide React and React Icons
+- Oxlint
+
+Backend:
+- Node.js ES modules, Express 4, Mongoose 8 / MongoDB
+- Zod request and environment validation
+- bcryptjs password hashing, JWT sessions in HTTP-only cookies
+- Nodemailer for account verification and service-request email
+- Helmet, CORS allowlist, express-rate-limit
+- Khalti and eSewa payment integrations, plus manual bank transfers
+
+3. PROJECT LAYOUT
+-----------------
+backend/
+  server.js                 API setup, environment validation and startup
+  data/catalog.js           Authoritative course prices and service catalog
+  middleware/auth.js        Signup, email verification, login and access checks
+  middleware/asyncRoute.js  Async Express route wrapper
+  models/index.js           User, Enrollment, ServiceRequest and Payment models
+  routes/commerce.routes.js Public catalog, enrollments and service requests
+  routes/dashboard.routes.js Student, company and admin dashboard APIs
+  routes/payments.routes.js Checkout, payment callbacks and verification
+  package.json              Backend scripts and dependencies
+  vercel.json               Vercel Node function route configuration
+
+frontend/
+  src/App.jsx               Browser route table and shared site layout
+  src/Pages/                Page-level UI and dashboards
+  src/Components/            Navigation, hero, footer and reusable sections
+  src/lib/api.js            Fetch wrapper, API base URL and cookie credentials
+  vite.config.js             Vite plugins and local API proxy
+  vercel.json                Frontend rewrite and caching rules
+  package.json               Frontend scripts and dependencies
+
+4. FRONTEND PAGES
+-----------------
+Browser paths:
+- /                         Home
+- /courses                  Course catalog
+- /courses/:id              Course details
+- /services                 Services catalog
+- /service-request          Submit a service request
+- /register and /signup     Course enrollment page
+- /register/:role and /signup/:role  Enrollment aliases
+- /login, /login/student, /login/admin  Authentication
+- /login/company            Redirects to /service-request
+- /register/:role           Enrollment alias with optional role segment
+- /signup/:role             Enrollment alias with optional role segment
+- /dashboard/:role          Role-specific dashboard
+- /contact                  Contact page
+
+Course list and detail pages load their prices from GET /api/courses. The
+enrollment page also loads the course list and shows the selected course price.
+The backend creates the enrollment and payment amount from the selected course
+in backend/data/catalog.js.
+
+5. API BASE URL AND ROUTES
+--------------------------
+API prefix: /api
+Local API default: http://localhost:5000
+Frontend local proxy: /api -> http://localhost:5000
+Production frontend API base: VITE_API_URL when set; otherwise the frontend
+uses https://askyra-tech.vercel.app.
+
+Health:
+- GET /                         API/database status and payment mode
+
+Authentication:
+- POST /api/auth/signup         Create student/company account and email OTP
+  Body: name, email, password, role ("student" or "company")
+- POST /api/auth/verify-email   Verify the OTP and create a session
+  Body: email, code (six digits)
+- POST /api/auth/resend-verification
+  Body: email
+- POST /api/auth/login          Login
+  Body: email, password, optional role
+- POST /api/auth/logout         Clear the session cookie
+- GET  /api/auth/me             Current user, or null if signed out
+
+Public catalog and commerce:
+- GET  /api/courses             Course records and priceNPR values
+- GET  /api/services            Service catalog
+- GET  /api/payments/methods    Available payment methods and enabled status
+- POST /api/enrollments         Create a student enrollment and payment
+  Body: courseId, paymentMethod ("khalti", "esewa", "bank_transfer")
+- POST /api/service-requests    Submit a service request
+  Body: companyName, email, phone, service, contactPerson, contactEmail,
+  position
+
+Dashboards (authentication and role required):
+- GET /api/dashboard/student    Student enrollments and payments
+- GET /api/dashboard/company    Company requests and payments
+- GET /api/dashboard/admin      Users, enrollments, requests, payments, counts
+
+Admin operations (admin role required):
+- PATCH /api/admin/enrollments/:id/progress
+  Body: progress (0-100), optional nextLesson
+- PATCH /api/admin/service-requests/:id
+  Optional fields: status, progress, milestone, update, priceNPR
+- POST /api/admin/service-requests/:id/invoice
+  Body: amountNPR
+- PATCH /api/admin/payments/:id/bank-transfer
+  Body: status ("paid" or "failed"), note
+
+Payment checkout/callbacks:
+- POST /api/payments/:paymentId/checkout
+  Body: paymentMethod ("khalti", "esewa", "bank_transfer")
+- GET /api/payments/callback/khalti
+- GET /api/payments/callback/esewa/success
+- GET /api/payments/callback/esewa/failure
+
+Payment callbacks verify provider responses before marking a payment as paid.
+Bank transfers remain pending until an administrator records the decision.
+
+6. DATA MODELS
+---------------
+User:
+- Email, bcrypt passwordHash, role, name, phone, companyName, active status
+- Email verification status and private OTP hash/expiry/attempt fields
+
+Enrollment:
+- User reference, course ID/title/category, amountNPR
+- Progress, status and next lesson
+- One enrollment per user/course pair
+
+ServiceRequest:
+- Optional company-account reference and contact details
+- Requested service, status, progress, milestone and updates
+- Optional quoted priceNPR
+
+Payment:
+- User and optional enrollment/service-request references
+- Description, amountNPR, currency NPR, provider and status
+- Provider reference, invoice number, payment timestamp and admin note
+
+Course catalog (current backend prices):
+- Ethical Hacking & Penetration Testing: NPR 19,999
+- SOC L1: NPR 14,999
+- MERN Stack: NPR 19,999
+- Full Stack Development: NPR 19,999
+- Frontend Development: NPR 9,999
+- Digital Marketing: NPR 9,999
+- Graphics Design: NPR 9,999
+- Networking: NPR 14,999
+
+7. ENVIRONMENT CONFIGURATION
+----------------------------
+Backend settings are validated in backend/server.js. Copy backend/.env.example
+to backend/.env for local development. Do not commit .env files or credentials.
+
+Required:
+- CLIENT_ORIGIN: allowed frontend origin(s), exact URL(s), comma-separated.
+  The first origin is used for payment return redirects.
+- MONGODB_URI: MongoDB connection string.
+- JWT_SECRET: at least 32 characters; use a unique random value.
+- ADMIN_EMAIL: bootstrap administrator email.
+- ADMIN_PASSWORD: bootstrap administrator password, at least 12 characters.
+- API_PUBLIC_URL: publicly reachable API base URL used by payment callbacks.
+
+Optional or defaulted:
+- NODE_ENV: development, test or production; defaults to development.
+- PORT: local server port; defaults to 5000.
+- MONGODB_DNS_SERVERS: optional comma-separated DNS resolver IP addresses.
+- PAYMENT_MODE: test or live; defaults to test. Checkout currently rejects
+  live mode until production payment processing is deliberately enabled.
+- PAYMENT_CURRENCY: fixed to NPR.
+- GMAIL_USER and GMAIL_APP_PASSWORD: configure both or neither. Needed for
+  signup verification and service-request email. App password must be 16 chars.
+- KHALTI_SECRET_KEY: empty disables Khalti.
+- KHALTI_BASE_URL: defaults to Khalti's test API URL.
+- ESEWA_MERCHANT_CODE and ESEWA_SECRET_KEY: empty values disable eSewa.
+- ESEWA_FORM_URL and ESEWA_STATUS_URL: eSewa checkout/status endpoints.
+- VITE_API_URL: optional frontend API base URL; omit for the documented default.
+
+Never put private keys or database credentials in frontend environment
+variables. Frontend environment values are public in the built application.
+
+8. SECURITY AND OPERATION
+-------------------------
+- Passwords are hashed with bcrypt on the server; clients send passwords over
+  HTTPS and must not send a client-generated hash as the password.
+- Signup requires at least 12 characters, uppercase/lowercase letters, a
+  number and a symbol. Signup also requires email OTP verification.
+- OTPs are six digits, expire after 10 minutes and allow up to five attempts.
+- Login/signup/verification endpoints allow 10 requests per 15 minutes per
+  client IP; API traffic has a separate limit of 120 requests per minute.
+- Sessions use a signed 12-hour JWT in an HTTP-only cookie.
+- Helmet is enabled. CORS allows only configured CLIENT_ORIGIN entries.
+- JSON request bodies are limited to 32 KB.
+- Admin registration is disabled. The admin account is created at startup from
+  ADMIN_EMAIL and ADMIN_PASSWORD.
+- Provider payment callbacks are verified server-side; never trust a browser
+  redirect as proof of payment.
+
+9. LOCAL COMMANDS
+-----------------
+Backend (from backend/):
+- npm install
+- npm run dev       Start API with Nodemon
+- npm start         Start API
+- npm test          Run Node's test runner (no backend tests are currently
+                    present)
+
+Frontend (from frontend/):
+- npm install
+- npm run dev       Start Vite development server
+- npm run build     Create production build
+- npm run preview   Preview production build
+- npm run lint      Run Oxlint
+
+Run MongoDB before starting the API. Start the frontend separately. During local
+development, Vite proxies /api calls to port 5000.
+
+10. DEPLOYMENT NOTES
+--------------------
+- Backend: deploy backend/ as the Vercel project root so backend/vercel.json is
+  used. Configure all required backend environment variables in Vercel.
+- Frontend: deploy frontend/ as the frontend project root. Configure VITE_API_URL
+  if the production API is not the documented default.
+- Set backend CLIENT_ORIGIN to the exact deployed frontend origin. Include
+  additional trusted origins as a comma-separated allowlist.
+- Set API_PUBLIC_URL to the deployed API URL and use HTTPS for production
+  payment callbacks.
+- Configure MongoDB network access for the deployed backend.
+- Live payments are not enabled by this code's current checkout checks. Review
+  gateway credentials, callbacks and verification before any live launch.
+
+11. PROJECT LIMITATIONS
+-----------------------
+- The course catalog and prices are static backend data, not editable through
+  an admin API.
+- Bank transfers require manual admin verification.
+- Payment mode defaults to test; live checkout is blocked in the current code.
+- The project has no card processor and must not collect card details.
+- Backend npm test currently reports zero tests.

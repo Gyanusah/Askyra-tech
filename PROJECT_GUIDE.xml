@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectGuide name="AskYRA Tech">
+  <updated>2026-11-17</updated>
+  <overview>
+    AskYRA Tech is a cybersecurity training and services website with a React frontend and an Express/MongoDB API. The backend is authoritative for course prices and payment amounts.
+  </overview>
+  <technology>
+    <frontend>React 19, React Router 7, Vite 8, Tailwind CSS 4, Lucide React, Oxlint</frontend>
+    <backend>Node.js ES modules, Express 4, Mongoose 8, MongoDB, Zod, bcryptjs, JWT, Nodemailer, Helmet, CORS, express-rate-limit</backend>
+    <payments>Khalti, eSewa, manual bank transfer</payments>
+  </technology>
+  <structure>
+    <directory name="backend">
+      <file path="server.js">Environment validation, Express setup, database initialization and serverless handler</file>
+      <file path="data/catalog.js">Authoritative course prices and service catalog</file>
+      <file path="middleware/auth.js">Signup, email verification, login, sessions and role checks</file>
+      <file path="middleware/asyncRoute.js">Async Express route wrapper</file>
+      <file path="models/index.js">Mongoose data models</file>
+      <file path="routes/commerce.routes.js">Catalog, enrollment and service-request endpoints</file>
+      <file path="routes/dashboard.routes.js">Student, company and administrator endpoints</file>
+      <file path="routes/payments.routes.js">Checkout and payment-provider callbacks</file>
+      <file path="vercel.json">Vercel Node function routing</file>
+    </directory>
+    <directory name="frontend">
+      <file path="src/App.jsx">Browser routes and shared page layout</file>
+      <directory name="src/Pages">Course, service, authentication and dashboard pages</directory>
+      <directory name="src/Components">Navigation, hero, footer and shared sections</directory>
+      <file path="src/lib/api.js">API fetch wrapper, credentials and base URL</file>
+      <file path="vite.config.js">Vite plugins and local /api proxy</file>
+      <file path="vercel.json">Frontend rewrite and cache headers</file>
+    </directory>
+  </structure>
+  <frontendRoutes>
+    <route path="/">Home</route>
+    <route path="/courses">Course catalog</route>
+    <route path="/courses/:id">Course details</route>
+    <route path="/services">Services catalog</route>
+    <route path="/service-request">Submit a service request</route>
+    <route path="/register">Course enrollment</route>
+    <route path="/register/:role">Course enrollment alias with optional role segment</route>
+    <route path="/signup">Course enrollment alias</route>
+    <route path="/signup/:role">Course enrollment alias with optional role segment</route>
+    <route path="/login">Login/signup</route>
+    <route path="/login/student">Student login</route>
+    <route path="/login/admin">Administrator login</route>
+    <route path="/login/company">Redirects to /service-request</route>
+    <route path="/dashboard/:role">Role-specific dashboard</route>
+    <route path="/contact">Contact page</route>
+  </frontendRoutes>
+  <api basePath="/api" localBaseUrl="http://localhost:5000">
+    <endpoint method="GET" path="/">API/database health and payment mode</endpoint>
+    <endpoint method="POST" path="/auth/signup">Create a student/company account and email an OTP. Body: name, email, password, role.</endpoint>
+    <endpoint method="POST" path="/auth/verify-email">Verify email and create session. Body: email, six-digit code.</endpoint>
+    <endpoint method="POST" path="/auth/resend-verification">Send a fresh OTP. Body: email.</endpoint>
+    <endpoint method="POST" path="/auth/login">Login. Body: email, password, optional role.</endpoint>
+    <endpoint method="POST" path="/auth/logout">Clear session cookie.</endpoint>
+    <endpoint method="GET" path="/auth/me">Return current user or null.</endpoint>
+    <endpoint method="GET" path="/courses">Return course catalog and priceNPR values.</endpoint>
+    <endpoint method="GET" path="/services">Return service catalog.</endpoint>
+    <endpoint method="GET" path="/payments/methods">Return configured payment methods.</endpoint>
+    <endpoint method="POST" path="/enrollments">Create a student enrollment and payment. Body: courseId, paymentMethod.</endpoint>
+    <endpoint method="POST" path="/service-requests">Submit service request. Body: companyName, email, phone, service, contactPerson, contactEmail, position.</endpoint>
+    <endpoint method="GET" path="/dashboard/student" role="student">Read student enrollments and payments.</endpoint>
+    <endpoint method="GET" path="/dashboard/company" role="company">Read company requests and payments.</endpoint>
+    <endpoint method="GET" path="/dashboard/admin" role="admin">Read users, enrollments, requests, payments and counts.</endpoint>
+    <endpoint method="PATCH" path="/admin/enrollments/:id/progress" role="admin">Update progress and optional nextLesson.</endpoint>
+    <endpoint method="PATCH" path="/admin/service-requests/:id" role="admin">Update service status, progress, milestone, update or priceNPR.</endpoint>
+    <endpoint method="POST" path="/admin/service-requests/:id/invoice" role="admin">Create NPR invoice. Body: amountNPR.</endpoint>
+    <endpoint method="PATCH" path="/admin/payments/:id/bank-transfer" role="admin">Verify/fail bank transfer. Body: status, note.</endpoint>
+    <endpoint method="POST" path="/payments/:paymentId/checkout">Start checkout. Body: paymentMethod.</endpoint>
+    <endpoint method="GET" path="/payments/callback/khalti">Khalti callback; server verifies provider status.</endpoint>
+    <endpoint method="GET" path="/payments/callback/esewa/success">eSewa success callback and status verification.</endpoint>
+    <endpoint method="GET" path="/payments/callback/esewa/failure">Mark pending eSewa payment failed.</endpoint>
+  </api>
+  <dataModels>
+    <model name="User">Email, bcrypt passwordHash, role, name, phone, companyName, active/email verification state, private OTP hash/expiry/attempts.</model>
+    <model name="Enrollment">User, course ID/title/category, amountNPR, progress, status, next lesson.</model>
+    <model name="ServiceRequest">Optional company user, contact details, service, status, progress, milestone, updates and optional priceNPR.</model>
+    <model name="Payment">User, optional enrollment/service request, amountNPR, provider, status, invoice number, provider reference and payment metadata.</model>
+  </dataModels>
+  <coursePrices currency="NPR" source="backend/data/catalog.js">
+    <course id="1" name="Ethical Hacking &amp; Penetration Testing" priceNPR="19999"/>
+    <course id="2" name="SOC L1" priceNPR="14999"/>
+    <course id="3" name="MERN Stack" priceNPR="19999"/>
+    <course id="4" name="Full Stack Development" priceNPR="19999"/>
+    <course id="5" name="Frontend Development" priceNPR="9999"/>
+    <course id="6" name="Digital Marketing" priceNPR="9999"/>
+    <course id="7" name="Graphics Design" priceNPR="9999"/>
+    <course id="8" name="Networking" priceNPR="14999"/>
+  </coursePrices>
+  <configuration>
+    <variable name="NODE_ENV" required="false">development, test or production; defaults to development.</variable>
+    <variable name="PORT" required="false">Local port; defaults to 5000.</variable>
+    <variable name="CLIENT_ORIGIN" required="true">Exact allowed frontend origin URLs, comma-separated. The first is used for payment return redirects.</variable>
+    <variable name="MONGODB_URI" required="true">MongoDB connection string.</variable>
+    <variable name="MONGODB_DNS_SERVERS" required="false">Optional comma-separated DNS resolver IP addresses.</variable>
+    <variable name="JWT_SECRET" required="true">Unique secret of at least 32 characters.</variable>
+    <variable name="ADMIN_EMAIL" required="true">Email for bootstrap administrator.</variable>
+    <variable name="ADMIN_PASSWORD" required="true">Bootstrap admin password, at least 12 characters.</variable>
+    <variable name="PAYMENT_MODE" required="false">test or live; defaults to test. Current checkout logic blocks live mode.</variable>
+    <variable name="PAYMENT_CURRENCY" required="false">Fixed to NPR.</variable>
+    <variable name="API_PUBLIC_URL" required="true">Public API URL used by payment callbacks.</variable>
+    <variable name="GMAIL_USER" required="false">Gmail account for verification and service email; configure together with GMAIL_APP_PASSWORD.</variable>
+    <variable name="GMAIL_APP_PASSWORD" required="false">16-character Gmail app password.</variable>
+    <variable name="KHALTI_SECRET_KEY" required="false">Empty disables Khalti checkout.</variable>
+    <variable name="KHALTI_BASE_URL" required="false">Khalti API URL; defaults to test endpoint.</variable>
+    <variable name="ESEWA_MERCHANT_CODE" required="false">eSewa merchant code.</variable>
+    <variable name="ESEWA_SECRET_KEY" required="false">eSewa signing secret.</variable>
+    <variable name="ESEWA_FORM_URL" required="false">eSewa checkout URL.</variable>
+    <variable name="ESEWA_STATUS_URL" required="false">eSewa status verification URL.</variable>
+    <variable name="VITE_API_URL" required="false">Frontend API base URL. Without it, production defaults to https://askyra-tech.vercel.app.</variable>
+  </configuration>
+  <security>
+    <item>Passwords are hashed with bcrypt on the server. Send passwords over HTTPS; do not send client-generated hashes.</item>
+    <item>New passwords require 12+ characters, upper/lowercase letters, a number and a symbol.</item>
+    <item>Email OTP has six digits, expires in 10 minutes and allows up to five attempts.</item>
+    <item>Authentication routes allow 10 requests per 15 minutes per client IP; general API traffic allows 120 requests per minute.</item>
+    <item>Session is a signed 12-hour JWT in an HTTP-only cookie.</item>
+    <item>API request bodies are limited to 32 KB. Helmet, CORS allowlisting and rate limits are enabled.</item>
+    <item>Admin registration is disabled; admin is bootstrapped from environment configuration.</item>
+    <item>Payment callbacks are verified server-side. Bank transfers require administrator verification.</item>
+  </security>
+  <commands>
+    <backend directory="backend">
+      <command>npm install</command>
+      <command>npm run dev</command>
+      <command>npm start</command>
+      <command>npm test</command>
+    </backend>
+    <frontend directory="frontend">
+      <command>npm install</command>
+      <command>npm run dev</command>
+      <command>npm run build</command>
+      <command>npm run preview</command>
+      <command>npm run lint</command>
+    </frontend>
+  </commands>
+  <deployment>
+    <backend>Deploy backend/ as the Vercel project root and configure required backend environment variables.</backend>
+    <frontend>Deploy frontend/ as the frontend project root. Set VITE_API_URL if the API is not at the configured default.</frontend>
+    <cors>Set CLIENT_ORIGIN to the exact frontend domain(s); use comma-separated origins for multiple trusted domains.</cors>
+    <payments>Use HTTPS callback URLs. Live payment mode is blocked by current code pending production review.</payments>
+  </deployment>
+  <limitations>
+    <item>Course catalog and prices are static backend data and have no admin editing endpoint.</item>
+    <item>No card processor is configured; do not collect card data.</item>
+    <item>Backend npm test currently reports zero tests.</item>
+  </limitations>
+</projectGuide>

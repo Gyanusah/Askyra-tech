@@ -108,6 +108,7 @@ if (
 
 const config = {
   jwtSecret: env.JWT_SECRET,
+  clientOrigin: env.CLIENT_ORIGIN[0].replace(/\/+$/, ""),
   clientOrigins: env.CLIENT_ORIGIN.map((origin) => origin.replace(/\/+$/, "")),
   apiPublicUrl: env.API_PUBLIC_URL.replace(/\/$/, ""),
   gmailUser: env.GMAIL_USER,

@@ -64,11 +64,7 @@ export default function ServiceCards() {
               </p>
 
               <a
-                href={
-                  service.title === "Training Programs"
-                    ? "#courses"
-                    : "#services"
-                }
+                href={service.title === "Training Programs" ? "" : ""}
                 className="inline-flex items-center gap-1.5
                   text-xs font-bold text-sky-700 transition-colors
                   hover:text-cyan-600"
